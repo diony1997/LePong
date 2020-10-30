@@ -58,7 +58,7 @@ public class Cena implements GLEventListener {
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
 
         dadosObjeto(gl, 20, 580, Color.WHITE, "MODO: " + printStart(start));
-        dadosObjeto(gl, 20, 5, Color.WHITE, "Movimente com as setas");
+        dadosObjeto(gl, 20, 5, Color.WHITE, "Movimente com as setas, comece/pause com espaço");
 
         //Parte de iluminação
         float[] posLuz = {-50f, 0f, 100f, 1};
