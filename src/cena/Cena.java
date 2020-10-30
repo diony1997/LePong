@@ -97,12 +97,17 @@ public class Cena implements GLEventListener {
             auxX = 1;
         }
         if (anguloY > 78 && tela != 0) {
-            auxY = -1;
+            auxY = auxY *-1;
         }
-        if(anguloY == -72 && (anguloX < (posPlayer + 15) && anguloX > (posPlayer - 15))){
-           auxY = 1; 
+        //Colisão com o player
+        if (anguloY == -72 && (anguloX <= (posPlayer + 15) && anguloX >= (posPlayer - 15)) && tela != 0) {
+            auxY = 1;
         }
-        if (anguloY < -80 && tela != 0) {
+        //evitar que a bola entre no player
+        if (anguloY < -72 && (anguloX <= (posPlayer + 15) && anguloX >= (posPlayer - 15)) && tela != 0) {
+            auxX = auxX * -1;
+        } 
+        if (anguloY < -88 && tela != 0) {
             fim();
         }
     }
@@ -113,8 +118,8 @@ public class Cena implements GLEventListener {
         start = false;
         auxX = auxY = 1;
     }
-    
-    public void desenharFundo(GL2 gl){
+
+    public void desenharFundo(GL2 gl) {
         gl.glColor3f(0.5f, 0.5f, 0.5f);
         gl.glPointSize(200f);
         gl.glBegin(GL2.GL_QUADS);
