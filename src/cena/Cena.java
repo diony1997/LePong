@@ -99,6 +99,9 @@ public class Cena implements GLEventListener {
         if (anguloY > 78 && tela != 0) {
             auxY = -1;
         }
+        if(anguloY == -72 && (anguloX < (posPlayer + 15) && anguloX > (posPlayer - 15))){
+           auxY = 1; 
+        }
         if (anguloY < -80 && tela != 0) {
             fim();
         }
