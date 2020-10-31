@@ -38,7 +38,7 @@ public class Renderer {
         FPSAnimator animator = new FPSAnimator(window, 60);
         animator.start(); //inicia o loop de animacao
 
-        //encerrar a aplicacao adequadamente
+        //encerrar a aplicacao adequadamente        
         window.addWindowListener(new WindowAdapter() {
             @Override
             public void windowDestroyNotify(WindowEvent e) {
@@ -46,9 +46,10 @@ public class Renderer {
                 System.exit(0);
             }
         });
-
+        
         //window.setFullscreen(true);        
         window.setVisible(true);
+        
     }
 
     public static void main(String[] args) {

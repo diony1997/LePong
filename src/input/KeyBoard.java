@@ -20,42 +20,50 @@ public class KeyBoard implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         System.out.println("Key pressed: " + e.getKeyCode());
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            System.exit(0);
-        }
 
-        if (e.getKeyChar() == KeyEvent.VK_SPACE) {
-            if (!cena.start) {
-                cena.start = true;
-                cena.tela = 1;
-            } else {
-                cena.start = false;
+        if(cena.pause){
+            switch(e.getKeyCode()){                
+                case KeyEvent.VK_R:
+                    cena.pause = !cena.pause;
+                    break;
+                case KeyEvent.VK_E:    
+                    System.exit(0);                    
+                    break;
             }
         }
-
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_UP:
-
-                break;
-            case KeyEvent.VK_DOWN:
-
-                break;
-            case KeyEvent.VK_RIGHT:
-                if (cena.start || cena.tela == 0) {
-                    if (cena.posPlayer < 84) {
-                        cena.posPlayer += 3;
+        else {
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_UP:
+                    break;
+                case KeyEvent.VK_DOWN:
+                    break;
+                case KeyEvent.VK_SPACE:
+                    if (!cena.start) {
+                        cena.start = true;
+                        cena.tela = 1;
                     }
-                }
-
-                break;
-            case KeyEvent.VK_LEFT:
-                if (cena.start || cena.tela == 0) {
-                    if (cena.posPlayer > -84) {
-                        cena.posPlayer -= 3;
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    if ((cena.start || cena.tela == 0) && !cena.pause) {
+                        if (cena.posPlayer < 84) {
+                            cena.posPlayer += 3;
+                        }
                     }
-                }
-                break;
-
+                    break;
+                case KeyEvent.VK_LEFT:
+                    if ((cena.start || cena.tela == 0) && !cena.pause) {
+                        if (cena.posPlayer > -84) {
+                            cena.posPlayer -= 3;
+                        }
+                    }
+                    break;
+            }           
+        }
+        
+        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            if(cena.start){
+                cena.pause = !cena.pause;
+            }            
         }
 
     }

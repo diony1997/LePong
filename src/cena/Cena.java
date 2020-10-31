@@ -18,7 +18,7 @@ public class Cena implements GLEventListener {
     private float xMin, xMax, yMin, yMax, zMin, zMax;
     private TextRenderer textRenderer;
     public float auxX, auxY, posPlayer, anguloX, anguloY;
-    public boolean start;
+    public boolean start, pause;
     public int tela;
     private GLU glu;
 
@@ -35,7 +35,7 @@ public class Cena implements GLEventListener {
         tela = 0;
         auxX = auxY = 1;
         posPlayer = 0;
-        start = false;
+        start = pause = false;
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
 
         //Habilita o buffer de profundidade
@@ -58,7 +58,7 @@ public class Cena implements GLEventListener {
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
 
         dadosObjeto(gl, 20, 580, Color.WHITE, "MODO: " + printStart(start));
-        dadosObjeto(gl, 20, 5, Color.WHITE, "Movimente com as setas, comece/pause com espaço");
+        dadosObjeto(gl, 20, 5, Color.WHITE, "Movimente com as setas, comece com espaço e pause com ESC.");                
 
         //Parte de iluminação
         float[] posLuz = {-50f, 0f, 100f, 1};
@@ -72,16 +72,26 @@ public class Cena implements GLEventListener {
         gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, posLuz, 0);
         gl.glShadeModel(GL2.GL_SMOOTH);
 
-        if (start) {
-            movimentarBola();
-        } else {
-            if (tela == 0) {
-                anguloX = posPlayer;
+        if(!pause){
+            if (start) {
+                movimentarBola();
+            } else {
+                if (tela == 0) {
+                    anguloX = posPlayer;
+                }
             }
         }
+        
         desenharFundo(gl);
         desenharBola(gl, glut);
         desenharPlayer(gl);
+        
+        if(pause){
+            textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 48));
+            dadosObjeto(gl, 175, 400, Color.WHITE, "R -> Resume");
+            dadosObjeto(gl, 200, 320, Color.WHITE, "E -> Exit");
+            textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
+        }
 
         gl.glFlush();
     }
@@ -132,12 +142,12 @@ public class Cena implements GLEventListener {
 
     public String printStart(boolean start) {
         if (start) {
+            if(pause){
+                return "Pausado";
+            }
             return "Jogando";
-        } else if (tela == 0) {
-            return "Tela Inicial";
-        } else {
-            return "Pausado";
         }
+        return "Tela Inicial";       
     }
 
     public void desenharBola(GL2 gl, GLUT glut) {
