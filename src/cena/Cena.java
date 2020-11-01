@@ -65,8 +65,8 @@ public class Cena implements GLEventListener {
         dadosObjeto(gl, 460, 560, Color.WHITE, "Pontuação: " + score);
         dadosObjeto(gl, 20, 5, Color.WHITE, "Movimente com as setas, comece com espaço e pause com ESC.");
 
-        anguloObt+=0.1;
-        vidas(gl,glut);
+        anguloObt += 0.1;
+        vidas(gl, glut);
         iluminacao(gl);
         if (!pause) {
             if (start) {
@@ -103,8 +103,8 @@ public class Cena implements GLEventListener {
         if (vidas > 0) {
             for (int i = 1; i <= vidas; i++) {
                 gl.glPushMatrix();
-                gl.glTranslatef(64+(i*6), 95, 0f);
-                gl.glRotatef(anguloObt,0,1,0);
+                gl.glTranslatef(64 + (i * 6), 95, 0f);
+                gl.glRotatef(anguloObt, 0, 1, 0);
                 gl.glColor3f(1f, 1f, 1f);
                 glut.glutSolidSphere(2, 20, 16);
                 gl.glPopMatrix();
@@ -151,10 +151,7 @@ public class Cena implements GLEventListener {
             morte();
         }
 
-        double[] v1 = {x3 - x4, y3 - y4};
-        double[] v2 = {x3 - anguloX, y3 - anguloY};
-        double xp = (v1[0] * v2[1]) - (v1[1] * v2[0]);
-
+       
         // Colisão quadrrado versão estatica
         //colisão com obstaculo Baixo
         if (score >= 200) {
