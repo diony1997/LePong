@@ -26,7 +26,7 @@ public class KeyBoard implements KeyListener {
                 case KeyEvent.VK_R:
                     cena.pause = !cena.pause;
                     break;
-                case KeyEvent.VK_E:    
+                case KeyEvent.VK_E:
                     System.exit(0);                    
                     break;
             }
@@ -46,14 +46,14 @@ public class KeyBoard implements KeyListener {
                 case KeyEvent.VK_RIGHT:
                     if ((cena.start || cena.tela == 0) && !cena.pause) {
                         if (cena.posPlayer < 84) {
-                            cena.posPlayer += 3;
+                            cena.posPlayer += 4;
                         }
                     }
                     break;
                 case KeyEvent.VK_LEFT:
                     if ((cena.start || cena.tela == 0) && !cena.pause) {
                         if (cena.posPlayer > -84) {
-                            cena.posPlayer -= 3;
+                            cena.posPlayer -= 4;
                         }
                     }
                     break;
