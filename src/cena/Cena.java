@@ -141,11 +141,11 @@ public class Cena implements GLEventListener {
         }
         //Colisão com o player
         //caso bata no canto da barra 5 de cada lateral
-        if (anguloY < -71 && anguloY > -73 && ((anguloX <= (posPlayer + 15) && anguloX >= (posPlayer + 10)) || ((anguloX <= (posPlayer - 10) && anguloX >= (posPlayer - 15)))) && tela != 0)  {
+        if (anguloY < -71 && anguloY > -73 && ((anguloX <= (posPlayer + 15) && anguloX >= (posPlayer + 10)) || ((anguloX <= (posPlayer - 10) && anguloX >= (posPlayer - 15)))) && tela != 0) {
             score += 100;
             auxY = auxY * -1;
         }
-        
+
         //caso bata no centro da barra 20 do meio
         if (anguloY < -71 && anguloY > -73 && (anguloX < (posPlayer + 10) && anguloX > (posPlayer - 10)) && tela != 0) {
             score += 50;
@@ -233,9 +233,16 @@ public class Cena implements GLEventListener {
 
     public void desenharObstaculo(GL2 gl, GLUT glut) {
         gl.glPushMatrix();
+        gl.glBegin(gl.GL_TRIANGLES);
         gl.glColor3f(0.4f, 0.4f, 0.4f);
-        gl.glRotatef(0, 0, 0, 1);
-        glut.glutSolidCube(72);
+
+        gl.glVertex3f(-36f, -36f, 5f);
+        gl.glVertex3f(36f, -36f, 5f);
+        gl.glVertex3f(-36f, 36f, 5f);
+
+        gl.glVertex3f(-36f, 36f, 5f);
+        gl.glVertex3f(36f, -36f, 5f);
+        gl.glVertex3f(36f, 36f, 5f);
         gl.glEnd();
         gl.glPopMatrix();
     }
