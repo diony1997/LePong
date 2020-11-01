@@ -25,6 +25,7 @@ public class Renderer {
         GLCapabilities caps = new GLCapabilities(profile);
         window = GLWindow.create(caps);
         window.setSize(screenWidth, screenHeight);
+        //window.setFullscreen(true);
         window.setTitle("Le Pong");
 
         //window.setResizable(false);

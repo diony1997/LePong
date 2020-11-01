@@ -19,7 +19,7 @@ public class Cena implements GLEventListener {
     private TextRenderer textRenderer;
     public float auxX, auxY, posPlayer, anguloX, anguloY, anguloObt;
     public boolean start, pause, fase, teste;
-    public int tela, score, vida;
+    public int tela, score, vidas;
     private GLU glu;
     private double x1, x2, x3, x4, y1, y2, y3, y4;
 
@@ -36,7 +36,8 @@ public class Cena implements GLEventListener {
         tela = score = 0;
         auxX = auxY = 1;
         posPlayer = 0;
-        vida = 3;
+        vidas = 5;
+        anguloObt = 0;
         start = pause = fase = teste = false;
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
 
@@ -60,22 +61,13 @@ public class Cena implements GLEventListener {
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
 
         dadosObjeto(gl, 20, 580, Color.WHITE, "MODO: " + printStart(start));
-        dadosObjeto(gl, 460, 580, Color.WHITE, "Vidas: " + vida);
+        dadosObjeto(gl, 460, 580, Color.WHITE, "Vidas: ");
         dadosObjeto(gl, 460, 560, Color.WHITE, "Pontuação: " + score);
         dadosObjeto(gl, 20, 5, Color.WHITE, "Movimente com as setas, comece com espaço e pause com ESC.");
 
-        //Parte de iluminação
-        float[] posLuz = {0f, 0f, 100f, 1};
-        float[] corLuz = {1f, 1f, 1f, 1};
-        gl.glEnable(GL2.GL_LIGHTING);
-        gl.glEnable(GL2.GL_LIGHT0);
-        gl.glMateriali(GL2.GL_FRONT, GL2.GL_SHININESS, 64);
-        gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, corLuz, 0);
-        gl.glEnable(GL2.GL_COLOR_MATERIAL);
-        gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, corLuz, 0);
-        gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, posLuz, 0);
-        gl.glShadeModel(GL2.GL_SMOOTH);
-
+        anguloObt+=0.1;
+        vidas(gl,glut);
+        iluminacao(gl);
         if (!pause) {
             if (start) {
                 movimentarBola();
@@ -100,11 +92,24 @@ public class Cena implements GLEventListener {
             textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
         }
 
-        if (vida == 0) {
+        if (vidas == 0) {
             fim();
         }
 
         gl.glFlush();
+    }
+
+    public void vidas(GL2 gl, GLUT glut) {
+        if (vidas > 0) {
+            for (int i = 1; i <= vidas; i++) {
+                gl.glPushMatrix();
+                gl.glTranslatef(64+(i*6), 95, 0f);
+                gl.glRotatef(anguloObt,0,1,0);
+                gl.glColor3f(1f, 1f, 1f);
+                glut.glutSolidSphere(2, 20, 16);
+                gl.glPopMatrix();
+            }
+        }
     }
 
     public void movimentarBola() {
@@ -173,16 +178,25 @@ public class Cena implements GLEventListener {
 
     }
 
-    public boolean checarObst() {
-
-        return true;
+    public void iluminacao(GL2 gl) {
+        //Parte de iluminação
+        float[] posLuz = {0f, 0f, 100f, 1};
+        float[] corLuz = {1f, 1f, 1f, 1};
+        gl.glEnable(GL2.GL_LIGHTING);
+        gl.glEnable(GL2.GL_LIGHT0);
+        gl.glMateriali(GL2.GL_FRONT, GL2.GL_SHININESS, 64);
+        gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, corLuz, 0);
+        gl.glEnable(GL2.GL_COLOR_MATERIAL);
+        gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, corLuz, 0);
+        gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, posLuz, 0);
+        gl.glShadeModel(GL2.GL_SMOOTH);
     }
 
     public void morte() {
         anguloY = - 72;
         tela = 0;
         start = false;
-        vida--;
+        vidas--;
         if (score >= 200) {
             auxX = auxY = 1.5f;
         } else {
@@ -197,7 +211,7 @@ public class Cena implements GLEventListener {
         auxX = auxY = 1;
         score = 0;
         fase = false;
-        vida = 3;
+        vidas = 5;
     }
 
     public String printStart(boolean start) {
@@ -223,40 +237,37 @@ public class Cena implements GLEventListener {
         gl.glPushMatrix();
         gl.glBegin(gl.GL_TRIANGLES);
         //Parede esquerda
-        gl.glColor3f(0.4f, 0.41f, 0.6f);
+        gl.glColor3f(0f, 0.41f, 0.6f);
         gl.glVertex3f(-94, -85, 5f);
         gl.glVertex3f(-90, -85, 5f);
         gl.glVertex3f(-94, 80, 5f);
 
-        gl.glColor3f(1f, 0f, 1f);
         gl.glVertex3f(-94, 80, 5f);
         gl.glVertex3f(-90, -85, 5f);
         gl.glVertex3f(-90, 80, 5f);
 
         //Teto
-        gl.glColor3f(0f, 0f, 1f);
+        gl.glColor3f(0f, 0.41f, 0.6f);
         gl.glVertex3f(-94, 80, 5f);
         gl.glVertex3f(94, 80, 5f);
         gl.glVertex3f(-94, 84, 5f);
 
-        gl.glColor3f(0f, 0f, 1f);
         gl.glVertex3f(-94, 84, 5f);
         gl.glVertex3f(94, 80, 5f);
         gl.glVertex3f(94, 84, 5f);
 
         //Parede direita
-        gl.glColor3f(0.4f, 0.41f, 0.6f);
+        gl.glColor3f(0f, 0.41f, 0.6f);
         gl.glVertex3f(90, -85, 5f);
         gl.glVertex3f(94, -85, 5f);
         gl.glVertex3f(94, 80, 5f);
 
-        gl.glColor3f(1f, 0f, 1f);
         gl.glVertex3f(90, -85, 5f);
         gl.glVertex3f(94, 80, 5f);
         gl.glVertex3f(90, 80, 5f);
 
         //fundo
-        gl.glColor3f(1f, 0f, 0f);
+        gl.glColor3f(1f, 1f, 1f);
         gl.glVertex3f(-90f, -85f, 1f);
         gl.glVertex3f(90f, -85f, 1f);
         gl.glVertex3f(-90f, 80f, 1f);
@@ -278,7 +289,7 @@ public class Cena implements GLEventListener {
     }
 
     public void desenharPlayer(GL2 gl) {
-        gl.glColor3f(1f, 1f, 1f);
+        gl.glColor3f(0.4f, 0.4f, 0.4f);
         gl.glPointSize(200f);
         gl.glBegin(GL2.GL_QUADS);
         gl.glVertex3f((14f + posPlayer), -85f, 5f);
