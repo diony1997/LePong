@@ -18,7 +18,7 @@ public class Cena implements GLEventListener {
     private float xMin, xMax, yMin, yMax, zMin, zMax;
     private TextRenderer textRenderer;
     public float auxX, auxY, posPlayer, anguloX, anguloY, anguloObt;
-    public boolean start, pause, fase, teste;
+    public boolean start, pause, fase, teste, telaInicial;
     public int tela, score, vidas;
     private GLU glu;
     private double x1, x2, x3, x4, y1, y2, y3, y4;
@@ -39,6 +39,7 @@ public class Cena implements GLEventListener {
         vidas = 5;
         anguloObt = 0;
         start = pause = fase = teste = false;
+        telaInicial = true;
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
 
         //Habilita o buffer de profundidade
@@ -80,6 +81,9 @@ public class Cena implements GLEventListener {
 
         if (score >= 200) {
             desenharObstaculo(gl, glut);
+        }
+        if (telaInicial) {
+            desenharTelaInicial(gl);
         }
         desenharFundo(gl);
         desenharBola(gl, glut);
@@ -136,8 +140,15 @@ public class Cena implements GLEventListener {
             auxY = auxY * -1;
         }
         //Colisão com o player
-        if (anguloY < -71 && anguloY > -73 && (anguloX <= (posPlayer + 15) && anguloX >= (posPlayer - 15)) && tela != 0) {
+        //caso bata no canto da barra 5 de cada lateral
+        if (anguloY < -71 && anguloY > -73 && ((anguloX <= (posPlayer + 15) && anguloX >= (posPlayer + 10)) || ((anguloX <= (posPlayer - 10) && anguloX >= (posPlayer - 15)))) && tela != 0)  {
             score += 100;
+            auxY = auxY * -1;
+        }
+        
+        //caso bata no centro da barra 20 do meio
+        if (anguloY < -71 && anguloY > -73 && (anguloX < (posPlayer + 10) && anguloX > (posPlayer - 10)) && tela != 0) {
+            score += 50;
             auxY = auxY * -1;
         }
         //evitar que a bola entre no player
@@ -151,7 +162,6 @@ public class Cena implements GLEventListener {
             morte();
         }
 
-       
         // Colisão quadrrado versão estatica
         //colisão com obstaculo Baixo
         if (score >= 200) {
@@ -274,6 +284,34 @@ public class Cena implements GLEventListener {
         gl.glVertex3f(90f, 80f, 1f);
 
         gl.glEnd();
+        gl.glPopMatrix();
+    }
+
+    public void desenharTelaInicial(GL2 gl) {
+        gl.glPushMatrix();
+        gl.glBegin(gl.GL_TRIANGLES);
+
+        //fundo
+        gl.glColor3f(0f, 1f, 1f);
+        gl.glVertex3f(-100f, -100f, 10f);
+        gl.glVertex3f(100f, -100f, 10f);
+        gl.glVertex3f(-100f, 100f, 10f);
+
+        gl.glVertex3f(-100f, 100f, 10f);
+        gl.glVertex3f(100f, -100f, 10f);
+        gl.glVertex3f(100f, 100f, 10f);
+        gl.glEnd();
+
+        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 48));
+        dadosObjeto(gl, 200, 500, Color.WHITE, "Le Pong");
+        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 18));
+        dadosObjeto(gl, 50, 320, Color.WHITE, "Controle a barra e marque pontos impedindo a bola de sair");
+        dadosObjeto(gl, 150, 290, Color.WHITE, "Caso saia você perderá uma vida!");
+        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 34));
+        dadosObjeto(gl, 30, 200, Color.RED, "Não deixe suas vidas acabarem!!!");
+        dadosObjeto(gl, 130, 40, Color.WHITE, "Tecle E para iniciar");
+        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
+
         gl.glPopMatrix();
     }
 

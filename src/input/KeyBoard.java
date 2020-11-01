@@ -20,6 +20,12 @@ public class KeyBoard implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         System.out.println("Key pressed: " + e.getKeyCode());
+        
+        if(cena.telaInicial){
+            if(e.getKeyCode() == KeyEvent.VK_E){
+                cena.telaInicial = false;
+            }
+        }
 
         if(cena.pause){
             switch(e.getKeyCode()){                
@@ -31,14 +37,14 @@ public class KeyBoard implements KeyListener {
                     break;
             }
         }
-        else {
+        else if(!cena.telaInicial){
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_UP:
                     break;
                 case KeyEvent.VK_DOWN:
                     break;
                 case KeyEvent.VK_SPACE:
-                    if (!cena.start) {
+                    if (!cena.start && !cena.telaInicial) {
                         cena.start = true;
                         cena.tela = 1;
                     }
