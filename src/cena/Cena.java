@@ -19,7 +19,7 @@ public class Cena implements GLEventListener {
     private TextRenderer textRenderer;
     public float auxX, auxY, posPlayer, anguloX, anguloY, anguloObt;
     public boolean start, pause, fase, teste;
-    public int tela, score;
+    public int tela, score, vida;
     private GLU glu;
     private double x1, x2, x3, x4, y1, y2, y3, y4;
 
@@ -36,7 +36,7 @@ public class Cena implements GLEventListener {
         tela = score = 0;
         auxX = auxY = 1;
         posPlayer = 0;
-        anguloObt = 0;
+        vida = 3;
         start = pause = fase = teste = false;
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
 
@@ -60,11 +60,12 @@ public class Cena implements GLEventListener {
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
 
         dadosObjeto(gl, 20, 580, Color.WHITE, "MODO: " + printStart(start));
-        dadosObjeto(gl, 460, 580, Color.WHITE, "Pontuação: " + score);
+        dadosObjeto(gl, 460, 580, Color.WHITE, "Vidas: " + vida);
+        dadosObjeto(gl, 460, 560, Color.WHITE, "Pontuação: " + score);
         dadosObjeto(gl, 20, 5, Color.WHITE, "Movimente com as setas, comece com espaço e pause com ESC.");
 
         //Parte de iluminação
-        float[] posLuz = {-50f, 0f, 100f, 1};
+        float[] posLuz = {0f, 0f, 100f, 1};
         float[] corLuz = {1f, 1f, 1f, 1};
         gl.glEnable(GL2.GL_LIGHTING);
         gl.glEnable(GL2.GL_LIGHT0);
@@ -85,7 +86,9 @@ public class Cena implements GLEventListener {
             }
         }
 
-        desenharObstaculo(gl);
+        if (score >= 200) {
+            desenharObstaculo(gl, glut);
+        }
         desenharFundo(gl);
         desenharBola(gl, glut);
         desenharPlayer(gl);
@@ -97,80 +100,94 @@ public class Cena implements GLEventListener {
             textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
         }
 
+        if (vida == 0) {
+            fim();
+        }
+
         gl.glFlush();
     }
 
     public void movimentarBola() {
         anguloX += auxX;
         anguloY += auxY;
-        //anguloObt += 0.01;
 
         if (anguloObt == 360) {
             anguloObt = 1;
         }
-        /*
+
         if (score == 200 && !fase) {
-            auxX = auxX * 2;
-            auxY = auxY * 2;
+            auxX = auxX * 1.5f;
+            auxY = auxY * 1.5f;
             fase = true;
         }
-         */
-        if (anguloX > 88 && tela != 0) {
+
+        if (anguloX > 84 && tela != 0) {
             auxX = auxX * -1;
         }
-        if (anguloX < -88 && tela != 0) {
+        if (anguloX < -84 && tela != 0) {
             auxX = auxX * -1;
         }
-        if (anguloY > 78 && tela != 0) {
+        if (anguloY > 74 && tela != 0) {
             auxY = auxY * -1;
         }
         //Colisão com o player
-        if (anguloY < -71 && (anguloX <= (posPlayer + 15) && anguloX >= (posPlayer - 15)) && tela != 0) {
+        if (anguloY < -71 && anguloY > -73 && (anguloX <= (posPlayer + 15) && anguloX >= (posPlayer - 15)) && tela != 0) {
             score += 100;
             auxY = auxY * -1;
         }
         //evitar que a bola entre no player
-        if ((anguloY < -75 && anguloY >= -85 ) && (anguloX == (posPlayer + 15) && anguloX == (posPlayer - 15)) && tela != 0) {
+        if ((anguloY < -71 && anguloY > -86) && (anguloX >= (posPlayer + 15) && anguloX <= (posPlayer + 19)) && tela != 0) {
+            auxX = auxX * -1;
+        }
+        if ((anguloY < -71 && anguloY > -86) && (anguloX >= (posPlayer - 19) && anguloX <= (posPlayer - 15)) && tela != 0) {
             auxX = auxX * -1;
         }
         if (anguloY < -88 && tela != 0) {
-            fim();
+            morte();
         }
-        //Desenho dinamico
-        //ponto x′ = x cos(θ)− y sin(θ),
-        //      y' = x sin(θ) + y cos(θ).
-        x1 = (-36 * Math.cos(anguloObt)) - (-36 * Math.sin(anguloObt)); //-30
-        y1 = (-36 * Math.sin(anguloObt)) + (-36 * Math.cos(anguloObt)); //-30
-        x2 = (36 * Math.cos(anguloObt)) - (-36 * Math.sin(anguloObt));
-        y2 = (36 * Math.sin(anguloObt)) + (-36 * Math.cos(anguloObt)); //
-        x3 = (36 * Math.cos(anguloObt)) - (36 * Math.sin(anguloObt)); //30
-        y3 = (36 * Math.sin(anguloObt)) + (36 * Math.cos(anguloObt)); //30  
-        x4 = (-36 * Math.cos(anguloObt)) - (36 * Math.sin(anguloObt)); //-30
-        y4 = (-36 * Math.sin(anguloObt)) + (36 * Math.cos(anguloObt)); //30 
 
-        // versão estatica
+        double[] v1 = {x3 - x4, y3 - y4};
+        double[] v2 = {x3 - anguloX, y3 - anguloY};
+        double xp = (v1[0] * v2[1]) - (v1[1] * v2[0]);
+
+        // Colisão quadrrado versão estatica
         //colisão com obstaculo Baixo
-        if((anguloX <= 40 && anguloX >= -40) &&(anguloY == -40)){
-            auxY = auxY * -1;
+        if (score >= 200) {
+            if ((anguloX <= 40 && anguloX >= -40) && (anguloY >= -42 && anguloY <= -39)) {
+                auxY = auxY * -1;
+            }
+            //Alto
+            if ((anguloX <= 40 && anguloX >= -40) && (anguloY <= 42 && anguloY >= 39)) {
+                auxY = auxY * -1;
+            }
+            //esquerda
+            if ((anguloX >= -42 && anguloX <= -39) && (anguloY <= 40 && anguloY >= -40)) {
+                auxX = auxX * -1;
+            }
+            //direita
+            if ((anguloX <= 42 && anguloX >= 39) && (anguloY <= 40 && anguloY >= -40)) {
+                auxX = auxX * -1;
+            }
+
         }
-        //Alto
-        if((anguloX <= 40 && anguloX >= -40) &&(anguloY == 40)){
-            auxY = auxY * -1;
-        }
-        //esquerda
-        if((anguloX == -40) &&(anguloY <= 40 && anguloY >= -40)){
-            auxX = auxX * -1;
-        }
-        //direita
-        if((anguloX == 40) &&(anguloY <= 40 && anguloY >= -40)){
-            auxX = auxX * -1;
-        }
-         
+
     }
 
     public boolean checarObst() {
-        
+
         return true;
+    }
+
+    public void morte() {
+        anguloY = - 72;
+        tela = 0;
+        start = false;
+        vida--;
+        if (score >= 200) {
+            auxX = auxY = 1.5f;
+        } else {
+            auxX = auxY = 1;
+        }
     }
 
     public void fim() {
@@ -180,17 +197,7 @@ public class Cena implements GLEventListener {
         auxX = auxY = 1;
         score = 0;
         fase = false;
-    }
-
-    public void desenharFundo(GL2 gl) {
-        gl.glColor3f(0.5f, 0.5f, 0.5f);
-        gl.glPointSize(200f);
-        gl.glBegin(GL2.GL_QUADS);
-        gl.glVertex2f(95f, -80f);
-        gl.glVertex2f(95f, 85f);
-        gl.glVertex2f(-95f, 85f);
-        gl.glVertex2f(-95f, -80f);
-        gl.glEnd();
+        vida = 3;
     }
 
     public String printStart(boolean start) {
@@ -203,17 +210,61 @@ public class Cena implements GLEventListener {
         return "Tela Inicial";
     }
 
-    public void desenharObstaculo(GL2 gl) {
+    public void desenharObstaculo(GL2 gl, GLUT glut) {
         gl.glPushMatrix();
-        gl.glColor3f(0f, 0f, 0f);
-        gl.glPointSize(200f);
-        gl.glRotatef(anguloObt, 0, 0f, 1f);
-        gl.glBegin(GL2.GL_POLYGON);
+        gl.glColor3f(0.4f, 0.4f, 0.4f);
+        gl.glRotatef(0, 0, 0, 1);
+        glut.glutSolidCube(72);
+        gl.glEnd();
+        gl.glPopMatrix();
+    }
 
-        gl.glVertex2f((float) x2, (float) y2);
-        gl.glVertex2f((float) x3, (float) y3);
-        gl.glVertex2f((float) x4, (float) y4);
-        gl.glVertex2f((float) x1, (float) y1);
+    public void desenharFundo(GL2 gl) {
+        gl.glPushMatrix();
+        gl.glBegin(gl.GL_TRIANGLES);
+        //Parede esquerda
+        gl.glColor3f(0.4f, 0.41f, 0.6f);
+        gl.glVertex3f(-94, -85, 5f);
+        gl.glVertex3f(-90, -85, 5f);
+        gl.glVertex3f(-94, 80, 5f);
+
+        gl.glColor3f(1f, 0f, 1f);
+        gl.glVertex3f(-94, 80, 5f);
+        gl.glVertex3f(-90, -85, 5f);
+        gl.glVertex3f(-90, 80, 5f);
+
+        //Teto
+        gl.glColor3f(0f, 0f, 1f);
+        gl.glVertex3f(-94, 80, 5f);
+        gl.glVertex3f(94, 80, 5f);
+        gl.glVertex3f(-94, 84, 5f);
+
+        gl.glColor3f(0f, 0f, 1f);
+        gl.glVertex3f(-94, 84, 5f);
+        gl.glVertex3f(94, 80, 5f);
+        gl.glVertex3f(94, 84, 5f);
+
+        //Parede direita
+        gl.glColor3f(0.4f, 0.41f, 0.6f);
+        gl.glVertex3f(90, -85, 5f);
+        gl.glVertex3f(94, -85, 5f);
+        gl.glVertex3f(94, 80, 5f);
+
+        gl.glColor3f(1f, 0f, 1f);
+        gl.glVertex3f(90, -85, 5f);
+        gl.glVertex3f(94, 80, 5f);
+        gl.glVertex3f(90, 80, 5f);
+
+        //fundo
+        gl.glColor3f(1f, 0f, 0f);
+        gl.glVertex3f(-90f, -85f, 1f);
+        gl.glVertex3f(90f, -85f, 1f);
+        gl.glVertex3f(-90f, 80f, 1f);
+
+        gl.glVertex3f(-90f, 80f, 1f);
+        gl.glVertex3f(90f, -85f, 1f);
+        gl.glVertex3f(90f, 80f, 1f);
+
         gl.glEnd();
         gl.glPopMatrix();
     }
@@ -230,10 +281,10 @@ public class Cena implements GLEventListener {
         gl.glColor3f(1f, 1f, 1f);
         gl.glPointSize(200f);
         gl.glBegin(GL2.GL_QUADS);
-        gl.glVertex2f((15f + posPlayer), -85f);
-        gl.glVertex2f((15f + posPlayer), -80f);
-        gl.glVertex2f((-15f + posPlayer), -80f);
-        gl.glVertex2f((-15f + posPlayer), -85f);
+        gl.glVertex3f((14f + posPlayer), -85f, 5f);
+        gl.glVertex3f((14f + posPlayer), -80f, 5f);
+        gl.glVertex3f((-14f + posPlayer), -80f, 5f);
+        gl.glVertex3f((-14f + posPlayer), -85f, 5f);
         gl.glEnd();
     }
 
@@ -278,6 +329,7 @@ public class Cena implements GLEventListener {
         //ativa a matriz de modelagem
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity(); //ler a matriz identidade
+
         System.out.println("Reshape: " + width + ", " + height);
     }
 

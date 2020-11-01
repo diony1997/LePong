@@ -45,14 +45,14 @@ public class KeyBoard implements KeyListener {
                     break;
                 case KeyEvent.VK_RIGHT:
                     if ((cena.start || cena.tela == 0) && !cena.pause) {
-                        if (cena.posPlayer < 84) {
+                        if (cena.posPlayer < 73) {
                             cena.posPlayer += 4;
                         }
                     }
                     break;
                 case KeyEvent.VK_LEFT:
                     if ((cena.start || cena.tela == 0) && !cena.pause) {
-                        if (cena.posPlayer > -84) {
+                        if (cena.posPlayer > -73) {
                             cena.posPlayer -= 4;
                         }
                     }
