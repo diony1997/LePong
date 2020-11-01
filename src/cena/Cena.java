@@ -60,7 +60,7 @@ public class Cena implements GLEventListener {
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
 
         dadosObjeto(gl, 20, 580, Color.WHITE, "MODO: " + printStart(start));
-        dadosObjeto(gl, 460, 580, Color.WHITE, "Pontuação: " + teste);
+        dadosObjeto(gl, 460, 580, Color.WHITE, "Pontuação: " + score);
         dadosObjeto(gl, 20, 5, Color.WHITE, "Movimente com as setas, comece com espaço e pause com ESC.");
 
         //Parte de iluminação
@@ -130,7 +130,7 @@ public class Cena implements GLEventListener {
             auxY = auxY * -1;
         }
         //evitar que a bola entre no player
-        if (anguloY < -73 && (anguloX == (posPlayer + 15) && anguloX == (posPlayer - 15)) && tela != 0) {
+        if ((anguloY < -75 && anguloY >= -85 ) && (anguloX == (posPlayer + 15) && anguloX == (posPlayer - 15)) && tela != 0) {
             auxX = auxX * -1;
         }
         if (anguloY < -88 && tela != 0) {
@@ -148,49 +148,28 @@ public class Cena implements GLEventListener {
         x4 = (-36 * Math.cos(anguloObt)) - (36 * Math.sin(anguloObt)); //-30
         y4 = (-36 * Math.sin(anguloObt)) + (36 * Math.cos(anguloObt)); //30 
 
-        if (x1 <= x2) {
-            if (y1 < y3) {
-                teste = checarObst(x1, x2, x3, x4, y1, y2, y3, y4);
-            } else {
-                teste = checarObst(x2, x3, x4, x1, y2, y3, y4, y1);
-            }
-        } else {
-            if (y3 > y1) {
-                teste = checarObst(x4, x1, x2, x3, y4, y1, y2, y3);
-            } else {
-                teste = checarObst(x3, x4, x1, x2, y3, y4, y1, y2);
-            }
-        }
-        /* versão estatica
+        // versão estatica
         //colisão com obstaculo Baixo
-        if((anguloX <= 30 && anguloX >= -30) &&(anguloY >= -36 && anguloY < -30)){
+        if((anguloX <= 40 && anguloX >= -40) &&(anguloY == -40)){
             auxY = auxY * -1;
         }
         //Alto
-        if((anguloX <= 30 && anguloX >= -30) &&(anguloY <= 36 && anguloY > 30)){
+        if((anguloX <= 40 && anguloX >= -40) &&(anguloY == 40)){
             auxY = auxY * -1;
         }
         //esquerda
-        if((anguloX >= -36 && anguloX < -30) &&(anguloY <= 30 && anguloY >= -30)){
+        if((anguloX == -40) &&(anguloY <= 40 && anguloY >= -40)){
             auxX = auxX * -1;
         }
         //direita
-        if((anguloX <= 36 && anguloX > 30) &&(anguloY <= 30 && anguloY >= -30)){
+        if((anguloX == 40) &&(anguloY <= 40 && anguloY >= -40)){
             auxX = auxX * -1;
         }
-         */
+         
     }
 
-    public boolean checarObst(double x1, double x2, double x3, double x4, double y1, double y2, double y3, double y4) {
-        double c1, c2, c3, c4;
-        c1 = (x1 * (anguloY - y2) + anguloX * (y2 - y1) + x2 * (y1 - anguloY)) / 2;
-        c2 = (x3 * (anguloY - y2) + anguloX * (y2 - y3) + x2 * (y3 - anguloY)) / 2;
-        c3 = (x4 * (anguloY - y3) + anguloX * (y3 - y4) + x3 * (y4 - anguloY)) / 2;
-        c4 = (x1 * (anguloY - y4) + anguloX * (y4 - y1) + x4 * (y1 - anguloY)) / 2;
-
-        if ((c1 + c2 + c3 + c4) > 0) {
-            return false;
-        }
+    public boolean checarObst() {
+        
         return true;
     }
 
