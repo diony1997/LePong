@@ -27,6 +27,7 @@ public class Cena implements GLEventListener {
     private TextRenderer textRenderer;
     public float auxX, auxY, posPlayer, anguloX, anguloY, anguloObt;
     public boolean start, pause, fase, teste, telaInicial, reset, ready;
+    private double i;
     public int tela, score, vidas, cont;
     private GLU glu;
     private Random random;
@@ -60,6 +61,7 @@ public class Cena implements GLEventListener {
         posPlayer = 0;
         vidas = 5;
         anguloObt = 0;
+        i = 0;
         start = pause = fase = teste = reset = ready = false;
         telaInicial = true;
         random = new Random();
@@ -95,8 +97,11 @@ public class Cena implements GLEventListener {
         anguloObt += 0.1;
         vidas(gl, glut);
         iluminacao(gl);
+
         musica(cont);
         if (!pause) {
+            desenharBola(gl, glut);
+
             if (start) {
                 movimentarBola();
             } else {
@@ -113,8 +118,7 @@ public class Cena implements GLEventListener {
             desenharTelaInicial(gl);
             cont = 1;
         }
-        desenharFundo(gl);
-        desenharBola(gl, glut);
+        desenharFundo(gl, glut);
         desenharPlayer(gl);
 
         if (pause) {
@@ -204,7 +208,7 @@ public class Cena implements GLEventListener {
             anguloObt = 1;
         }
 
-        if (score == 200 && !fase) {
+        if (score >= 200 && !fase) {
 //            auxX = auxX * 1.5f;
 //            auxY = auxY * 1.5f;
             musica(5);
@@ -279,16 +283,61 @@ public class Cena implements GLEventListener {
 
     public void iluminacao(GL2 gl) {
         //Parte de iluminação
-        float[] posLuz = {0f, 0f, 100f, 1};
-        float[] corLuz = {1f, 1f, 1f, 1};
-        gl.glEnable(GL2.GL_LIGHTING);
-        gl.glEnable(GL2.GL_LIGHT0);
-        gl.glMateriali(GL2.GL_FRONT, GL2.GL_SHININESS, 64);
-        gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, corLuz, 0);
-        gl.glEnable(GL2.GL_COLOR_MATERIAL);
-        gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, corLuz, 0);
-        gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, posLuz, 0);
-        gl.glShadeModel(GL2.GL_SMOOTH);
+        float[] corLuz = {1f, 1f, 1f, 1f};
+        if (!fase) {
+
+            gl.glPushMatrix();
+            gl.glRotatef(anguloObt * 10f, 0, 0, 1);
+            gl.glTranslatef(0, -30, 0);
+            float[] posLuz = {0f, 0, 300, 1};
+            gl.glEnable(GL2.GL_LIGHTING);
+            gl.glDisable(GL2.GL_LIGHT1);
+            gl.glEnable(GL2.GL_LIGHT0);
+            gl.glMateriali(GL2.GL_FRONT, GL2.GL_SHININESS, 64);
+            gl.glMaterialfv(GL2.GL_FRONT, GL2.GL_SPECULAR, corLuz, 0);
+            gl.glEnable(GL2.GL_COLOR_MATERIAL);
+            gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, corLuz, 1);
+            gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, posLuz, 0);
+
+            gl.glLightf(GL2.GL_LIGHT0, GL2.GL_SPOT_CUTOFF, 4f);
+            gl.glLightf(GL2.GL_LIGHT0, GL2.GL_SPOT_EXPONENT, 1);
+
+            gl.glShadeModel(GL2.GL_SMOOTH);
+            gl.glPopMatrix();
+            desenharCirculo(gl);
+        } else {
+            if (i >= 0 && i <= 4) {
+                corLuz[0] = 1f;
+                corLuz[1] = 1f;
+                corLuz[2] = 1f;
+                corLuz[3] = 1f;
+            } else if(i > 4 && i <= 9)  {
+                corLuz[0] = 1f;
+                corLuz[1] = 1f;
+                corLuz[2] = 0f;
+                corLuz[3] = 1f;
+            } else {
+                i = 0;
+            }
+            float[] posLuz = {0f, 0f, 100f, 1};
+
+            gl.glEnable(GL2.GL_LIGHTING);
+            gl.glDisable(GL2.GL_LIGHT0);
+            gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_SPECULAR, corLuz, 0);
+            gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION, posLuz, 0);
+            gl.glShadeModel(GL2.GL_SMOOTH);
+            gl.glEnable(GL2.GL_LIGHT1);
+
+            float[] posBola = {anguloX, anguloY, 100f, 1};
+            gl.glEnable(GL2.GL_LIGHT0);
+            gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, posBola, 0);
+            gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_SPECULAR, corLuz, 0);
+            gl.glShadeModel(GL2.GL_SMOOTH);
+            gl.glEnable(GL2.GL_LIGHT1);
+            desenharCirculo2(gl);
+            i++;
+        }
+
     }
 
     public void morte() {
@@ -302,6 +351,67 @@ public class Cena implements GLEventListener {
         } else {
             auxX = auxY = 1;
         }
+    }
+
+    public void desenharCirculo(GL2 gl) {
+        gl.glPushMatrix();
+        gl.glRotatef(anguloObt * 10f, 0, 0, 1);
+
+        gl.glTranslatef(0, -30, 6);
+        gl.glColor3f(1f, 1f, 0);
+        gl.glBegin(GL2.GL_POLYGON);
+        for (int i = 0; i <= 300; i++) {
+            double angle = 2 * Math.PI * i / 300;
+            double x = 20 * Math.cos(angle);
+            double y = 20 * Math.sin(angle);
+            gl.glVertex2d(x, y);
+        }
+        gl.glEnd();
+        gl.glPopMatrix();
+    }
+
+    public void desenharCirculo2(GL2 gl) {
+        float[] cor = {1,1,1};
+        if (i >= 0 && i <= 4) {
+                cor[0] = 1f;
+                cor[1] = 1f;
+                cor[2] = 1f;
+                
+            } else if(i > 4 && i <= 9)  {
+                cor[0] = 1f;
+                cor[1] = 1f;
+                cor[2] = 0f;
+                ;
+            } else {
+                i = 0;
+            }
+        i++;
+        gl.glPushMatrix();
+        gl.glBegin(GL2.GL_POLYGON);
+        gl.glColor3f(cor[0], cor[1], cor[2]);
+        gl.glVertex3f(-6f+anguloX, anguloY, 6f);
+        gl.glVertex3f(6f+anguloX, anguloY, 6f);
+        gl.glVertex3f(0f, 0f, 8f);
+
+        gl.glVertex3f(anguloX, 6f+anguloY, 6f);
+        gl.glVertex3f(+anguloX, -6f+anguloY, 6f);
+        gl.glVertex3f(0f, 0f, 8f);
+        
+        gl.glEnd();
+        gl.glPopMatrix();
+        gl.glPushMatrix();
+        gl.glTranslatef(anguloX, anguloY, 6);
+        
+        gl.glColor3f(cor[0], cor[1], cor[2]);
+        gl.glBegin(GL2.GL_POLYGON);
+        for (int i = 0; i <= 300; i++) {
+            double angle = 2 * Math.PI * i / 300;
+            double x = 10 * Math.cos(angle);
+            double y = 10 * Math.sin(angle);
+            gl.glVertex2d(x, y);
+        }
+        gl.glEnd();
+        gl.glPopMatrix();
     }
 
     public void fim() {
@@ -336,52 +446,73 @@ public class Cena implements GLEventListener {
     public void desenharObstaculo(GL2 gl, GLUT glut) {
         gl.glPushMatrix();
         gl.glBegin(gl.GL_TRIANGLES);
+        
         gl.glColor3f(0.4f, 0.4f, 0.4f);
 
-        gl.glVertex3f(-8f, -8f, 5f);
-        gl.glVertex3f(8f, -8f, 5f);
-        gl.glVertex3f(-8f, 8f, 5f);
+        gl.glVertex3f(-8f, -8f, 8f);
+        gl.glVertex3f(8f, -8f, 8f);
+        gl.glVertex3f(-8f, 8f, 8f);
 
-        gl.glVertex3f(-8f, 8f, 5f);
-        gl.glVertex3f(8f, -8f, 5f);
-        gl.glVertex3f(8f, 8f, 5f);
+        gl.glVertex3f(-8f, 8f, 8f);
+        gl.glVertex3f(8f, -8f, 8f);
+        gl.glVertex3f(8f, 8f, 8f);
         gl.glEnd();
+        gl.glPushMatrix();
+        gl.glColor3f(1, 1, 1);
+        gl.glTranslatef(0,0,8f);
+        glut.glutSolidSphere(6, 20, 16);
+        gl.glPopMatrix();
         gl.glPopMatrix();
     }
 
-    public void desenharFundo(GL2 gl) {
+    public void desenharFundo(GL2 gl, GLUT glut) {
         gl.glPushMatrix();
         gl.glBegin(gl.GL_TRIANGLES);
+        gl.glPushMatrix();
+        gl.glTranslatef(0, 0, 10f);
         //Parede esquerda
-        gl.glColor3f(0f, 0.41f, 0.6f);
-        gl.glVertex3f(-94, -85, 5f);
-        gl.glVertex3f(-90, -85, 5f);
-        gl.glVertex3f(-94, 80, 5f);
 
-        gl.glVertex3f(-94, 80, 5f);
-        gl.glVertex3f(-90, -85, 5f);
-        gl.glVertex3f(-90, 80, 5f);
+        gl.glColor3f(0f, 0.41f, 0.6f);
+        gl.glVertex3f(-94, -85, 8f);
+        gl.glVertex3f(-90, -85, 8f);
+        gl.glVertex3f(-94, 80, 8f);
+
+        gl.glVertex3f(-94, 80, 8f);
+        gl.glVertex3f(-90, -85, 8f);
+        gl.glVertex3f(-90, 80, 8f);
 
         //Teto
         gl.glColor3f(0f, 0.41f, 0.6f);
-        gl.glVertex3f(-94, 80, 5f);
-        gl.glVertex3f(94, 80, 5f);
-        gl.glVertex3f(-94, 84, 5f);
+        gl.glVertex3f(-94, 80, 8f);
+        gl.glVertex3f(94, 80, 8f);
+        gl.glVertex3f(-94, 84, 8f);
 
-        gl.glVertex3f(-94, 84, 5f);
-        gl.glVertex3f(94, 80, 5f);
-        gl.glVertex3f(94, 84, 5f);
+        gl.glVertex3f(-94, 84, 8f);
+        gl.glVertex3f(94, 80, 8f);
+        gl.glVertex3f(94, 84, 8f);
 
         //Parede direita
         gl.glColor3f(0f, 0.41f, 0.6f);
-        gl.glVertex3f(90, -85, 5f);
-        gl.glVertex3f(94, -85, 5f);
-        gl.glVertex3f(94, 80, 5f);
+        gl.glVertex3f(90, -85, 8f);
+        gl.glVertex3f(94, -85, 8f);
+        gl.glVertex3f(94, 80, 8f);
 
-        gl.glVertex3f(90, -85, 5f);
-        gl.glVertex3f(94, 80, 5f);
-        gl.glVertex3f(90, 80, 5f);
+        gl.glVertex3f(90, -85, 8f);
+        gl.glVertex3f(94, 80, 8f);
+        gl.glVertex3f(90, 80, 8f);
 
+        //Chao
+        gl.glColor3f(0f, 0f, 0f);
+        gl.glVertex3f(-94, -85, 8f);
+        gl.glVertex3f(94, -95, 8f);
+        gl.glVertex3f(94, -85, 8f);
+
+        gl.glVertex3f(-94, -85, 8f);
+        gl.glVertex3f(-94, -95, 8f);
+        gl.glVertex3f(94, -95, 8f);
+
+        gl.glPopMatrix();
+        gl.glTranslatef(0, 0, 5f);
         //fundo
         gl.glColor3f(1f, 1f, 1f);
         gl.glVertex3f(-90f, -85f, 1f);
@@ -398,8 +529,8 @@ public class Cena implements GLEventListener {
 
     public void desenharTelaInicial(GL2 gl) {
         gl.glPushMatrix();
+        gl.glTranslatef(0, 0, 20);
         gl.glBegin(gl.GL_TRIANGLES);
-
         //fundo
         gl.glColor3f(0f, 1f, 1f);
         gl.glVertex3f(-100f, -100f, 10f);
@@ -423,11 +554,11 @@ public class Cena implements GLEventListener {
 
         gl.glPopMatrix();
     }
-    
+
     public void desenharTelaFinal(GL2 gl) {
         gl.glPushMatrix();
+        gl.glTranslatef(0, 0, 20);
         gl.glBegin(gl.GL_TRIANGLES);
-
         //fundo
         gl.glColor3f(1f, 1f, 0f);
         gl.glVertex3f(-100f, -100f, 10f);
@@ -452,7 +583,7 @@ public class Cena implements GLEventListener {
 
     public void desenharBola(GL2 gl, GLUT glut) {
         gl.glPushMatrix();
-        gl.glTranslatef(anguloX, anguloY, 0f);
+        gl.glTranslatef(anguloX, anguloY, 6f);
         gl.glColor3f(0f, 0f, 0.6f);
         glut.glutSolidSphere(8, 20, 16);
         gl.glPopMatrix();
@@ -462,10 +593,10 @@ public class Cena implements GLEventListener {
         gl.glColor3f(0.4f, 0.4f, 0.4f);
         gl.glPointSize(200f);
         gl.glBegin(GL2.GL_QUADS);
-        gl.glVertex3f((14f + posPlayer), -85f, 5f);
-        gl.glVertex3f((14f + posPlayer), -80f, 5f);
-        gl.glVertex3f((-14f + posPlayer), -80f, 5f);
-        gl.glVertex3f((-14f + posPlayer), -85f, 5f);
+        gl.glVertex3f((14f + posPlayer), -85f, 8f);
+        gl.glVertex3f((14f + posPlayer), -80f, 8f);
+        gl.glVertex3f((-14f + posPlayer), -80f, 8f);
+        gl.glVertex3f((-14f + posPlayer), -85f, 8f);
         gl.glEnd();
     }
 
