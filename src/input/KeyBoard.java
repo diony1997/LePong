@@ -20,27 +20,44 @@ public class KeyBoard implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         System.out.println("Key pressed: " + e.getKeyCode());
-        
-        if(cena.telaInicial && !cena.pause){
-            if(e.getKeyCode() == KeyEvent.VK_E){
-                cena.telaInicial = false;
+
+        if (cena.vidas == 0) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                cena.ready = true;
             }
         }
 
-        if(cena.pause){
-            switch(e.getKeyCode()){                
-                case KeyEvent.VK_R:
-                    cena.pause = !cena.pause;
-                    break;
-                case KeyEvent.VK_E:
-                    System.exit(0);                    
-                    break;
-                case KeyEvent.VK_M:
-                    cena.reset = !cena.reset;                    
-                    break;
+        if (cena.telaInicial && !cena.pause) {
+            if (e.getKeyCode() == KeyEvent.VK_E) {
+                cena.telaInicial = false;
+                cena.musica(2);
+                cena.musica(3);
             }
         }
-        else if(!cena.telaInicial){
+
+        if (cena.pause) {
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_R:
+                    cena.pause = !cena.pause;
+                    if (cena.cont == 1) {
+                        cena.musica(3);
+                    } else {
+                        cena.musica(6);
+                    }
+                    break;
+                case KeyEvent.VK_E:
+                    System.exit(0);
+                    break;
+                case KeyEvent.VK_M:
+                    if(cena.cont == 1){
+                        cena.musica(5);
+                    } else {
+                        cena.musica(8);
+                    }
+                    cena.reset = !cena.reset;
+                    break;
+            }
+        } else if (!cena.telaInicial) {
             switch (e.getKeyCode()) {
                 case KeyEvent.VK_UP:
                     break;
@@ -66,13 +83,26 @@ public class KeyBoard implements KeyListener {
                         }
                     }
                     break;
-            }           
+            }
         }
-        
+
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            if(true){
+            if (true) {
                 cena.pause = !cena.pause;
-            }            
+                if (cena.pause) {
+                    if (cena.cont == 1) {
+                        cena.musica(4);
+                    } else {
+                        cena.musica(7);
+                    }
+                } else {
+                    if (cena.cont == 1) {
+                        cena.musica(3);
+                    } else {
+                        cena.musica(6);
+                    }
+                }
+            }
         }
 
     }

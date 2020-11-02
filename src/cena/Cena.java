@@ -8,7 +8,14 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.gl2.GLUT;
 import java.awt.Color;
 import java.awt.Font;
+import java.io.File;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 /**
  *
@@ -19,11 +26,24 @@ public class Cena implements GLEventListener {
     private float xMin, xMax, yMin, yMax, zMin, zMax;
     private TextRenderer textRenderer;
     public float auxX, auxY, posPlayer, anguloX, anguloY, anguloObt;
-    public boolean start, pause, fase, teste, telaInicial, reset;
-    public int tela, score, vidas;
+    public boolean start, pause, fase, teste, telaInicial, reset, ready;
+    public int tela, score, vidas, cont;
     private GLU glu;
-    private double x1, x2, x3, x4, y1, y2, y3, y4;
     private Random random;
+    final JFXPanel fxPanel = new JFXPanel();
+    String tema = "Sounds/tema1.mp3";
+    String tema1 = "Sounds/start.mp3";
+    String tema2 = "Sounds/tema2.mp3";
+    String tema3 = "Sounds/gameover.mp3";
+
+    Media hit = new Media(new File(tema).toURI().toString());
+    Media hit2 = new Media(new File(tema1).toURI().toString());
+    Media hit3 = new Media(new File(tema2).toURI().toString());
+    Media hit4 = new Media(new File(tema3).toURI().toString());
+    MediaPlayer mediaPlayer = new MediaPlayer(hit);
+    MediaPlayer mpStart = new MediaPlayer(hit2);
+    MediaPlayer mpTema2 = new MediaPlayer(hit3);
+    MediaPlayer mpGG = new MediaPlayer(hit4);
 
     @Override
     public void init(GLAutoDrawable drawable) {
@@ -35,12 +55,12 @@ public class Cena implements GLEventListener {
         xMax = yMax = zMax = 100;
         anguloX = posPlayer;
         anguloY = -72;
-        tela = score = 0;
+        tela = score = cont = 0;
         auxX = auxY = 1;
         posPlayer = 0;
         vidas = 5;
         anguloObt = 0;
-        start = pause = fase = teste = reset = false;
+        start = pause = fase = teste = reset = ready = false;
         telaInicial = true;
         random = new Random();
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
@@ -51,7 +71,7 @@ public class Cena implements GLEventListener {
 
     @Override
     public void display(GLAutoDrawable drawable) {
-        if(reset){
+        if (reset) {
             init(drawable);
         }
         //obtem o contexto Opengl
@@ -75,6 +95,7 @@ public class Cena implements GLEventListener {
         anguloObt += 0.1;
         vidas(gl, glut);
         iluminacao(gl);
+        musica(cont);
         if (!pause) {
             if (start) {
                 movimentarBola();
@@ -90,6 +111,7 @@ public class Cena implements GLEventListener {
         }
         if (telaInicial) {
             desenharTelaInicial(gl);
+            cont = 1;
         }
         desenharFundo(gl);
         desenharBola(gl, glut);
@@ -104,10 +126,61 @@ public class Cena implements GLEventListener {
         }
 
         if (vidas == 0) {
-            fim();
+            desenharTelaFinal(gl);
+            if (cont == 1) {
+                musica(5);
+                musica(9);
+                cont = 11;
+            } else {
+                musica(8);
+                musica(9);
+                cont = 11;
+            }
+            if (ready) {
+                fim();
+            }
         }
 
         gl.glFlush();
+    }
+
+    public void musica(int cont) {
+        switch (cont) {
+            case 0:
+                mpStart.setVolume(0.2);
+                mpStart.play();
+                break;
+            case 2:
+                mpStart.stop();
+                break;
+            case 3:
+                mediaPlayer.setVolume(0.2);
+                mediaPlayer.play();
+                break;
+            case 4:
+                mediaPlayer.pause();
+                break;
+            case 5:
+                mediaPlayer.stop();
+                break;
+            case 6:
+                mpTema2.setVolume(0.2);
+                mpTema2.play();
+                break;
+            case 7:
+                mpTema2.pause();
+                break;
+            case 8:
+                mpTema2.stop();
+                break;
+            case 9:
+                mpGG.setVolume(0.2);
+                mpGG.play();
+                break;
+            case 10:
+                mpGG.stop();
+                break;
+        }
     }
 
     public void vidas(GL2 gl, GLUT glut) {
@@ -134,12 +207,20 @@ public class Cena implements GLEventListener {
         if (score == 200 && !fase) {
 //            auxX = auxX * 1.5f;
 //            auxY = auxY * 1.5f;
+            musica(5);
+            musica(6);
+            cont = 2;
+            try {
+                TimeUnit.SECONDS.sleep(4);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Cena.class.getName()).log(Level.SEVERE, null, ex);
+            }
             fase = true;
         }
 
         float randomX = auxX > 0 ? (-1 * (random.nextFloat() * ((fase ? 1.9f : 1.4f) - (fase ? 1.5f : 1)) + (fase ? 1.5f : 1))) : (random.nextFloat() * ((fase ? 1.9f : 1.4f) - (fase ? 1.5f : 1)) + (fase ? 1.5f : 1));
         float randomY = auxY > 0 ? (-1 * (random.nextFloat() * ((fase ? 1.9f : 1.4f) - (fase ? 1.5f : 1)) + (fase ? 1.5f : 1))) : (random.nextFloat() * ((fase ? 1.9f : 1.4f) - (fase ? 1.5f : 1)) + (fase ? 1.5f : 1));
-        
+
         if (anguloX > 84 && tela != 0) {
             auxX = randomX;
         }
@@ -170,7 +251,7 @@ public class Cena implements GLEventListener {
         }
         if (anguloY < -88 && tela != 0) {
             morte();
-        }            
+        }
 
         // Colisão quadrado versão estatica
         //colisão com obstaculo Baixo
@@ -217,7 +298,7 @@ public class Cena implements GLEventListener {
         vidas--;
         if (score >= 200) {
 //            auxX = auxY = 1.5f;
-            auxY = Math.abs(auxY);            
+            auxY = Math.abs(auxY);
         } else {
             auxX = auxY = 1;
         }
@@ -231,6 +312,15 @@ public class Cena implements GLEventListener {
         score = 0;
         fase = false;
         vidas = 5;
+        musica(10);
+        if (cont == 1) {
+            musica(5);
+        } else {
+            musica(8);
+        }
+        musica(3);
+        cont = 1;
+        ready = false;
     }
 
     public String printStart(boolean start) {
@@ -329,6 +419,32 @@ public class Cena implements GLEventListener {
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 34));
         dadosObjeto(gl, 30, 200, Color.RED, "Não deixe suas vidas acabarem!!!");
         dadosObjeto(gl, 130, 40, Color.WHITE, "Tecle E para iniciar");
+        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
+
+        gl.glPopMatrix();
+    }
+    
+    public void desenharTelaFinal(GL2 gl) {
+        gl.glPushMatrix();
+        gl.glBegin(gl.GL_TRIANGLES);
+
+        //fundo
+        gl.glColor3f(1f, 1f, 0f);
+        gl.glVertex3f(-100f, -100f, 10f);
+        gl.glVertex3f(100f, -100f, 10f);
+        gl.glVertex3f(-100f, 100f, 10f);
+
+        gl.glVertex3f(-100f, 100f, 10f);
+        gl.glVertex3f(100f, -100f, 10f);
+        gl.glVertex3f(100f, 100f, 10f);
+        gl.glEnd();
+
+        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 48));
+        dadosObjeto(gl, 180, 500, Color.WHITE, "GAME OVER");
+        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 34));
+        dadosObjeto(gl, 150, 290, Color.WHITE, "você foi capturado");
+        dadosObjeto(gl, 100, 200, Color.RED, "Sua pontuação foi " + score);
+        dadosObjeto(gl, 130, 40, Color.WHITE, "Tecle E para continuar");
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
 
         gl.glPopMatrix();
