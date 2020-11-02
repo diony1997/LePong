@@ -8,6 +8,7 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.gl2.GLUT;
 import java.awt.Color;
 import java.awt.Font;
+import java.util.Random;
 
 /**
  *
@@ -18,10 +19,11 @@ public class Cena implements GLEventListener {
     private float xMin, xMax, yMin, yMax, zMin, zMax;
     private TextRenderer textRenderer;
     public float auxX, auxY, posPlayer, anguloX, anguloY, anguloObt;
-    public boolean start, pause, fase, teste, telaInicial;
+    public boolean start, pause, fase, teste, telaInicial, reset;
     public int tela, score, vidas;
     private GLU glu;
     private double x1, x2, x3, x4, y1, y2, y3, y4;
+    private Random random;
 
     @Override
     public void init(GLAutoDrawable drawable) {
@@ -38,8 +40,9 @@ public class Cena implements GLEventListener {
         posPlayer = 0;
         vidas = 5;
         anguloObt = 0;
-        start = pause = fase = teste = false;
+        start = pause = fase = teste = reset = false;
         telaInicial = true;
+        random = new Random();
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
 
         //Habilita o buffer de profundidade
@@ -48,6 +51,9 @@ public class Cena implements GLEventListener {
 
     @Override
     public void display(GLAutoDrawable drawable) {
+        if(reset){
+            init(drawable);
+        }
         //obtem o contexto Opengl
         GL2 gl = drawable.getGL().getGL2();
         //objeto para desenho 3D
@@ -92,7 +98,8 @@ public class Cena implements GLEventListener {
         if (pause) {
             textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 48));
             dadosObjeto(gl, 175, 400, Color.WHITE, "R -> Resume");
-            dadosObjeto(gl, 200, 320, Color.WHITE, "E -> Exit");
+            dadosObjeto(gl, 130, 330, Color.WHITE, "M -> Main Menu");
+            dadosObjeto(gl, 205, 260, Color.WHITE, "E -> Exit");
             textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
         }
 
@@ -125,60 +132,64 @@ public class Cena implements GLEventListener {
         }
 
         if (score == 200 && !fase) {
-            auxX = auxX * 1.5f;
-            auxY = auxY * 1.5f;
+//            auxX = auxX * 1.5f;
+//            auxY = auxY * 1.5f;
             fase = true;
         }
 
+        float randomX = auxX > 0 ? (-1 * (random.nextFloat() * ((fase ? 1.9f : 1.4f) - (fase ? 1.5f : 1)) + (fase ? 1.5f : 1))) : (random.nextFloat() * ((fase ? 1.9f : 1.4f) - (fase ? 1.5f : 1)) + (fase ? 1.5f : 1));
+        float randomY = auxY > 0 ? (-1 * (random.nextFloat() * ((fase ? 1.9f : 1.4f) - (fase ? 1.5f : 1)) + (fase ? 1.5f : 1))) : (random.nextFloat() * ((fase ? 1.9f : 1.4f) - (fase ? 1.5f : 1)) + (fase ? 1.5f : 1));
+        
         if (anguloX > 84 && tela != 0) {
-            auxX = auxX * -1;
+            auxX = randomX;
         }
         if (anguloX < -84 && tela != 0) {
-            auxX = auxX * -1;
+            auxX = randomX;
         }
         if (anguloY > 74 && tela != 0) {
-            auxY = auxY * -1;
+            auxY = randomY;
         }
         //Colisão com o player
         //caso bata no canto da barra 5 de cada lateral
         if (anguloY < -71 && anguloY > -73 && ((anguloX <= (posPlayer + 15) && anguloX >= (posPlayer + 10)) || ((anguloX <= (posPlayer - 10) && anguloX >= (posPlayer - 15)))) && tela != 0) {
             score += 100;
-            auxY = auxY * -1;
+            auxY = randomX;
         }
 
         //caso bata no centro da barra 20 do meio
         if (anguloY < -71 && anguloY > -73 && (anguloX < (posPlayer + 10) && anguloX > (posPlayer - 10)) && tela != 0) {
             score += 50;
-            auxY = auxY * -1;
+            auxY = randomY;
         }
         //evitar que a bola entre no player
         if ((anguloY < -71 && anguloY > -86) && (anguloX >= (posPlayer + 15) && anguloX <= (posPlayer + 19)) && tela != 0) {
-            auxX = auxX * -1;
+            auxX = randomX;
         }
         if ((anguloY < -71 && anguloY > -86) && (anguloX >= (posPlayer - 19) && anguloX <= (posPlayer - 15)) && tela != 0) {
-            auxX = auxX * -1;
+            auxX = randomX;
         }
         if (anguloY < -88 && tela != 0) {
             morte();
-        }
+        }            
 
-        // Colisão quadrrado versão estatica
+        // Colisão quadrado versão estatica
         //colisão com obstaculo Baixo
         if (score >= 200) {
-            if ((anguloX <= 40 && anguloX >= -40) && (anguloY >= -42 && anguloY <= -39)) {
-                auxY = auxY * -1;
+            //Baixo
+            if ((anguloX <= 14 && anguloX >= -14) && (anguloY >= -16 && anguloY <= -13)) {
+                auxY = randomY;
             }
             //Alto
-            if ((anguloX <= 40 && anguloX >= -40) && (anguloY <= 42 && anguloY >= 39)) {
-                auxY = auxY * -1;
+            if ((anguloX <= 14 && anguloX >= -14) && (anguloY <= 16 && anguloY >= 13)) {
+                auxY = randomY;
             }
             //esquerda
-            if ((anguloX >= -42 && anguloX <= -39) && (anguloY <= 40 && anguloY >= -40)) {
-                auxX = auxX * -1;
+            if ((anguloX >= -16 && anguloX <= -13) && (anguloY <= 14 && anguloY >= -14)) {
+                auxX = randomX;
             }
             //direita
-            if ((anguloX <= 42 && anguloX >= 39) && (anguloY <= 40 && anguloY >= -40)) {
-                auxX = auxX * -1;
+            if ((anguloX <= 16 && anguloX >= 13) && (anguloY <= 14 && anguloY >= -14)) {
+                auxX = randomX;
             }
 
         }
@@ -205,7 +216,8 @@ public class Cena implements GLEventListener {
         start = false;
         vidas--;
         if (score >= 200) {
-            auxX = auxY = 1.5f;
+//            auxX = auxY = 1.5f;
+            auxY = Math.abs(auxY);            
         } else {
             auxX = auxY = 1;
         }
@@ -236,13 +248,13 @@ public class Cena implements GLEventListener {
         gl.glBegin(gl.GL_TRIANGLES);
         gl.glColor3f(0.4f, 0.4f, 0.4f);
 
-        gl.glVertex3f(-36f, -36f, 5f);
-        gl.glVertex3f(36f, -36f, 5f);
-        gl.glVertex3f(-36f, 36f, 5f);
+        gl.glVertex3f(-8f, -8f, 5f);
+        gl.glVertex3f(8f, -8f, 5f);
+        gl.glVertex3f(-8f, 8f, 5f);
 
-        gl.glVertex3f(-36f, 36f, 5f);
-        gl.glVertex3f(36f, -36f, 5f);
-        gl.glVertex3f(36f, 36f, 5f);
+        gl.glVertex3f(-8f, 8f, 5f);
+        gl.glVertex3f(8f, -8f, 5f);
+        gl.glVertex3f(8f, 8f, 5f);
         gl.glEnd();
         gl.glPopMatrix();
     }
