@@ -90,8 +90,8 @@ public class Cena implements GLEventListener {
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
 
         dadosObjeto(gl, 20, 580, Color.WHITE, "MODO: " + printStart(start));
-        dadosObjeto(gl, 460, 580, Color.WHITE, "Vidas: ");
-        dadosObjeto(gl, 460, 560, Color.WHITE, "Pontuação: " + score);
+        dadosObjeto(gl, 420, 580, Color.WHITE, "Membros: ");
+        dadosObjeto(gl, 420, 560, Color.WHITE, "Dados Coletados: " + score);
         dadosObjeto(gl, 20, 5, Color.WHITE, "Movimente com as setas, comece com espaço e pause com ESC.");
 
         anguloObt += 0.1;
@@ -159,6 +159,7 @@ public class Cena implements GLEventListener {
                 break;
             case 3:
                 mediaPlayer.setVolume(0.2);
+                mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
                 mediaPlayer.play();
                 break;
             case 4:
@@ -169,6 +170,7 @@ public class Cena implements GLEventListener {
                 break;
             case 6:
                 mpTema2.setVolume(0.2);
+                mpTema2.setCycleCount(MediaPlayer.INDEFINITE);
                 mpTema2.play();
                 break;
             case 7:
@@ -288,7 +290,7 @@ public class Cena implements GLEventListener {
 
             gl.glPushMatrix();
             gl.glRotatef(anguloObt * 10f, 0, 0, 1);
-            gl.glTranslatef(0, -30, 0);
+            gl.glTranslatef(0, -50, 0);
             float[] posLuz = {0f, 0, 300, 1};
             gl.glEnable(GL2.GL_LIGHTING);
             gl.glDisable(GL2.GL_LIGHT1);
@@ -307,9 +309,9 @@ public class Cena implements GLEventListener {
             desenharCirculo(gl);
         } else {
             if (i >= 0 && i <= 4) {
-                corLuz[0] = 1f;
-                corLuz[1] = 1f;
-                corLuz[2] = 1f;
+                corLuz[0] = 0f;
+                corLuz[1] = 0f;
+                corLuz[2] = 0f;
                 corLuz[3] = 1f;
             } else if(i > 4 && i <= 9)  {
                 corLuz[0] = 1f;
@@ -357,7 +359,7 @@ public class Cena implements GLEventListener {
         gl.glPushMatrix();
         gl.glRotatef(anguloObt * 10f, 0, 0, 1);
 
-        gl.glTranslatef(0, -30, 6);
+        gl.glTranslatef(0, -50, 6);
         gl.glColor3f(1f, 1f, 0);
         gl.glBegin(GL2.GL_POLYGON);
         for (int i = 0; i <= 300; i++) {
@@ -543,12 +545,13 @@ public class Cena implements GLEventListener {
         gl.glEnd();
 
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 48));
-        dadosObjeto(gl, 200, 500, Color.WHITE, "Le Pong");
+        dadosObjeto(gl, 175, 500, Color.WHITE, "Metal Pong");
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 18));
-        dadosObjeto(gl, 50, 320, Color.WHITE, "Controle a barra e marque pontos impedindo a bola de sair");
-        dadosObjeto(gl, 150, 290, Color.WHITE, "Caso saia você perderá uma vida!");
+        dadosObjeto(gl, 50, 360, Color.WHITE, "Você e seu esquadrão infiltraram em uma base inimiga !");
+        dadosObjeto(gl, 50, 320, Color.WHITE, "Colete as informações com os seus aliados");
+        dadosObjeto(gl, 50, 280, Color.WHITE, "Faça com que eles permaneçam o");
+        dadosObjeto(gl, 350, 280, Color.RED, "MAXIMO POSSIVEL");
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 34));
-        dadosObjeto(gl, 30, 200, Color.RED, "Não deixe suas vidas acabarem!!!");
         dadosObjeto(gl, 130, 40, Color.WHITE, "Tecle E para iniciar");
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
 
@@ -571,11 +574,10 @@ public class Cena implements GLEventListener {
         gl.glEnd();
 
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 48));
-        dadosObjeto(gl, 180, 500, Color.WHITE, "GAME OVER");
+        dadosObjeto(gl, 160, 500, Color.WHITE, "GAME OVER");
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 34));
-        dadosObjeto(gl, 150, 290, Color.WHITE, "você foi capturado");
-        dadosObjeto(gl, 100, 200, Color.RED, "Sua pontuação foi " + score);
-        dadosObjeto(gl, 130, 40, Color.WHITE, "Tecle E para continuar");
+        dadosObjeto(gl, 70, 240, Color.RED, "Informações adquiridas: " + score);
+        dadosObjeto(gl, 110, 40, Color.WHITE, "Tecle E para continuar");
         textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
 
         gl.glPopMatrix();
@@ -584,7 +586,7 @@ public class Cena implements GLEventListener {
     public void desenharBola(GL2 gl, GLUT glut) {
         gl.glPushMatrix();
         gl.glTranslatef(anguloX, anguloY, 6f);
-        gl.glColor3f(0f, 0f, 0.6f);
+        gl.glColor3f(0.2f, 0.2f, 0.2f);
         glut.glutSolidSphere(8, 20, 16);
         gl.glPopMatrix();
     }
