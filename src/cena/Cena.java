@@ -27,7 +27,7 @@ public class Cena implements GLEventListener {
     private TextRenderer textRenderer;
     public float auxX, auxY, posPlayer, anguloX, anguloY, anguloObt;
     public boolean start, pause, fase, teste, telaInicial, reset, ready;
-    private double i;
+    private double contLuz;
     public int tela, score, vidas, cont;
     private GLU glu;
     private Random random;
@@ -61,7 +61,7 @@ public class Cena implements GLEventListener {
         posPlayer = 0;
         vidas = 5;
         anguloObt = 0;
-        i = 0;
+        contLuz = 0;
         start = pause = fase = teste = reset = ready = false;
         telaInicial = true;
         random = new Random();
@@ -203,6 +203,8 @@ public class Cena implements GLEventListener {
     }
 
     public void movimentarBola() {
+        float posBolax = anguloX;
+        float posBolaY = anguloY;
         anguloX += auxX;
         anguloY += auxY;
 
@@ -228,33 +230,31 @@ public class Cena implements GLEventListener {
         float randomY = auxY > 0 ? (-1 * (random.nextFloat() * ((fase ? 1.9f : 1.4f) - (fase ? 1.5f : 1)) + (fase ? 1.5f : 1))) : (random.nextFloat() * ((fase ? 1.9f : 1.4f) - (fase ? 1.5f : 1)) + (fase ? 1.5f : 1));
 
         if (anguloX > 84 && tela != 0) {
+            anguloX = posBolax;
+            anguloY = posBolaY;
             auxX = randomX;
+
         }
         if (anguloX < -84 && tela != 0) {
+            anguloX = posBolax;
+            anguloY = posBolaY;
             auxX = randomX;
+
         }
         if (anguloY > 74 && tela != 0) {
+            anguloX = posBolax;
+            anguloY = posBolaY;
             auxY = randomY;
-        }
-        //Colisão com o player
-        //caso bata no canto da barra 5 de cada lateral
-        if (anguloY < -71 && anguloY > -73 && ((anguloX <= (posPlayer + 15) && anguloX >= (posPlayer + 10)) || ((anguloX <= (posPlayer - 10) && anguloX >= (posPlayer - 15)))) && tela != 0) {
-            score += 100;
-            auxY = randomX;
         }
 
-        //caso bata no centro da barra 20 do meio
-        if (anguloY < -71 && anguloY > -73 && (anguloX < (posPlayer + 10) && anguloX > (posPlayer - 10)) && tela != 0) {
+        //Colisão com o player
+        if ((posBolaY < -74 && posBolaY > -80) && (posBolax <= (posPlayer + 15) && posBolax >= (posPlayer - 15))) {
             score += 50;
+            anguloX = posBolax;
+            anguloY = -72;
             auxY = randomY;
         }
-        //evitar que a bola entre no player
-        if ((anguloY < -71 && anguloY > -86) && (anguloX >= (posPlayer + 15) && anguloX <= (posPlayer + 19)) && tela != 0) {
-            auxX = randomX;
-        }
-        if ((anguloY < -71 && anguloY > -86) && (anguloX >= (posPlayer - 19) && anguloX <= (posPlayer - 15)) && tela != 0) {
-            auxX = randomX;
-        }
+
         if (anguloY < -88 && tela != 0) {
             morte();
         }
@@ -263,19 +263,28 @@ public class Cena implements GLEventListener {
         //colisão com obstaculo Baixo
         if (score >= 200) {
             //Baixo
-            if ((anguloX <= 14 && anguloX >= -14) && (anguloY >= -16 && anguloY <= -13)) {
+            if ((anguloX < 12 && anguloX > -12) && (anguloY >= -14 && anguloY < -8)) {
+                anguloX = posBolax;
+                anguloY = posBolaY;
                 auxY = randomY;
             }
             //Alto
-            if ((anguloX <= 14 && anguloX >= -14) && (anguloY <= 16 && anguloY >= 13)) {
+            if ((anguloX < 12 && anguloX > -12) && (anguloY <= 14 && anguloY > 8)) {
+
+                anguloX = posBolax;
+                anguloY = posBolaY;
                 auxY = randomY;
             }
             //esquerda
-            if ((anguloX >= -16 && anguloX <= -13) && (anguloY <= 14 && anguloY >= -14)) {
+            if ((anguloX >= -14 && anguloX < -8) && (anguloY < 12 && anguloY > -12)) {
+                anguloX = posBolax;
+                anguloY = posBolaY;
                 auxX = randomX;
             }
             //direita
-            if ((anguloX <= 16 && anguloX >= 13) && (anguloY <= 14 && anguloY >= -14)) {
+            if ((anguloX <= 14 && anguloX > 8) && (anguloY < 12 && anguloY > -12)) {
+                anguloX = posBolax;
+                anguloY = posBolaY;
                 auxX = randomX;
             }
 
@@ -308,36 +317,32 @@ public class Cena implements GLEventListener {
             gl.glPopMatrix();
             desenharCirculo(gl);
         } else {
-            if (i >= 0 && i <= 4) {
+            if (contLuz >= 0 && contLuz <= 4) {
                 corLuz[0] = 0f;
                 corLuz[1] = 0f;
                 corLuz[2] = 0f;
                 corLuz[3] = 1f;
-            } else if(i > 4 && i <= 9)  {
+            } else if (contLuz > 4 && contLuz <= 9) {
                 corLuz[0] = 1f;
                 corLuz[1] = 1f;
                 corLuz[2] = 0f;
                 corLuz[3] = 1f;
             } else {
-                i = 0;
+                contLuz = 0;
             }
             float[] posLuz = {0f, 0f, 100f, 1};
 
-            gl.glEnable(GL2.GL_LIGHTING);
-            gl.glDisable(GL2.GL_LIGHT0);
             gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_SPECULAR, corLuz, 0);
             gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION, posLuz, 0);
             gl.glShadeModel(GL2.GL_SMOOTH);
             gl.glEnable(GL2.GL_LIGHT1);
 
             float[] posBola = {anguloX, anguloY, 100f, 1};
-            gl.glEnable(GL2.GL_LIGHT0);
             gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, posBola, 0);
             gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_SPECULAR, corLuz, 0);
             gl.glShadeModel(GL2.GL_SMOOTH);
-            gl.glEnable(GL2.GL_LIGHT1);
             desenharCirculo2(gl);
-            i++;
+            contLuz++;
         }
 
     }
@@ -373,37 +378,37 @@ public class Cena implements GLEventListener {
     }
 
     public void desenharCirculo2(GL2 gl) {
-        float[] cor = {1,1,1};
-        if (i >= 0 && i <= 4) {
-                cor[0] = 1f;
-                cor[1] = 1f;
-                cor[2] = 1f;
-                
-            } else if(i > 4 && i <= 9)  {
-                cor[0] = 1f;
-                cor[1] = 1f;
-                cor[2] = 0f;
-                ;
-            } else {
-                i = 0;
-            }
-        i++;
+        float[] cor = {1, 1, 1};
+        if (contLuz >= 0 && contLuz <= 4) {
+            cor[0] = 1f;
+            cor[1] = 1f;
+            cor[2] = 1f;
+
+        } else if (contLuz > 4 && contLuz <= 9) {
+            cor[0] = 1f;
+            cor[1] = 1f;
+            cor[2] = 0f;
+            ;
+        } else {
+            contLuz = 0;
+        }
+        contLuz++;
         gl.glPushMatrix();
         gl.glBegin(GL2.GL_POLYGON);
         gl.glColor3f(cor[0], cor[1], cor[2]);
-        gl.glVertex3f(-6f+anguloX, anguloY, 6f);
-        gl.glVertex3f(6f+anguloX, anguloY, 6f);
+        gl.glVertex3f(-6f + anguloX, anguloY, 6f);
+        gl.glVertex3f(6f + anguloX, anguloY, 6f);
         gl.glVertex3f(0f, 0f, 8f);
 
-        gl.glVertex3f(anguloX, 6f+anguloY, 6f);
-        gl.glVertex3f(+anguloX, -6f+anguloY, 6f);
+        gl.glVertex3f(anguloX, 6f + anguloY, 6f);
+        gl.glVertex3f(+anguloX, -6f + anguloY, 6f);
         gl.glVertex3f(0f, 0f, 8f);
-        
+
         gl.glEnd();
         gl.glPopMatrix();
         gl.glPushMatrix();
         gl.glTranslatef(anguloX, anguloY, 6);
-        
+
         gl.glColor3f(cor[0], cor[1], cor[2]);
         gl.glBegin(GL2.GL_POLYGON);
         for (int i = 0; i <= 300; i++) {
@@ -448,7 +453,7 @@ public class Cena implements GLEventListener {
     public void desenharObstaculo(GL2 gl, GLUT glut) {
         gl.glPushMatrix();
         gl.glBegin(gl.GL_TRIANGLES);
-        
+
         gl.glColor3f(0.4f, 0.4f, 0.4f);
 
         gl.glVertex3f(-8f, -8f, 8f);
@@ -461,7 +466,7 @@ public class Cena implements GLEventListener {
         gl.glEnd();
         gl.glPushMatrix();
         gl.glColor3f(1, 1, 1);
-        gl.glTranslatef(0,0,8f);
+        gl.glTranslatef(0, 0, 8f);
         glut.glutSolidSphere(6, 20, 16);
         gl.glPopMatrix();
         gl.glPopMatrix();
