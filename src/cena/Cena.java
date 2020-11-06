@@ -111,6 +111,8 @@ public class Cena implements GLEventListener {
         textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 24));
         dadosObjeto(gl, 20, 7, Color.WHITE, "Movimente com as setas, comece com espaço e pause com ESC.");
 
+        System.out.println(anguloX);
+        System.out.println(anguloY);
         anguloObt += 0.1;
         vidas(gl, glut);
         iluminacao(gl);
@@ -305,27 +307,27 @@ public class Cena implements GLEventListener {
         //colisão com obstaculo Baixo
         if (score >= 200) {
             //Baixo
-            if ((anguloX < 12 && anguloX > -12) && (anguloY >= -14 && anguloY < -8)) {
+            if ((posBolax < 12 && posBolax > -12) && (anguloY >= -14 && anguloY < -8)) {
                 anguloX = posBolax;
-                anguloY = posBolaY;
+                anguloY = -15;
                 auxY = randomY;
             }
             //Alto
-            if ((anguloX < 12 && anguloX > -12) && (anguloY <= 14 && anguloY > 8)) {
+            if ((posBolax < 12 && posBolax > -12) && (anguloY <= 14 && anguloY > 8)) {
 
                 anguloX = posBolax;
-                anguloY = posBolaY;
+                anguloY = 15;
                 auxY = randomY;
             }
             //esquerda
-            if ((anguloX >= -14 && anguloX < -8) && (anguloY < 12 && anguloY > -12)) {
-                anguloX = posBolax;
+            if ((posBolax >= -14 && posBolax < -8) && (anguloY < 12 && anguloY > -12)) {
+                anguloX = -15;
                 anguloY = posBolaY;
                 auxX = randomX;
             }
             //direita
-            if ((anguloX <= 14 && anguloX > 8) && (anguloY < 12 && anguloY > -12)) {
-                anguloX = posBolax;
+            if ((posBolax <= 14 && posBolax > 8) && (anguloY < 12 && anguloY > -12)) {
+                anguloX = 15;
                 anguloY = posBolaY;
                 auxX = randomX;
             }
