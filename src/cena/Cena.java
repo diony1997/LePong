@@ -6,9 +6,12 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.util.gl2.GLUT;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
 import java.awt.Color;
 import java.awt.Font;
 import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -26,16 +29,20 @@ public class Cena implements GLEventListener {
     private float xMin, xMax, yMin, yMax, zMin, zMax;
     private TextRenderer textRenderer;
     public float auxX, auxY, posPlayer, anguloX, anguloY, anguloObt;
-    public boolean start, pause, fase, teste, telaInicial, reset, ready;
+    public boolean start, pause, fase, teste, telaInicial, reset, ready, destroy;
     private double contLuz;
-    public int tela, score, vidas, cont;
+    public int tela, score, vidas, cont, qtdTxt;
     private GLU glu;
     private Random random;
     final JFXPanel fxPanel = new JFXPanel();
-    String tema = "Sounds/tema1.mp3";
-    String tema1 = "Sounds/start.mp3";
-    String tema2 = "Sounds/tema2.mp3";
-    String tema3 = "Sounds/gameover.mp3";
+    private String tema = "src/res/musicas/tema1.mp3";
+    private String tema1 = "src/res/musicas/start.mp3";
+    private String tema2 = "src/res/musicas/tema2.mp3";
+    private String tema3 = "src/res/musicas/gameover.mp3";
+    private Texture[] vetTextures;
+    private static final String txtInicio = "src/res/textura/paredeMetal.jpg";
+    private static final String txtFundo = "src/res/textura/base.png";
+    private static final String txtFim = "src/res/textura/paredeMetal2.jpg";
 
     Media hit = new Media(new File(tema).toURI().toString());
     Media hit2 = new Media(new File(tema1).toURI().toString());
@@ -61,12 +68,14 @@ public class Cena implements GLEventListener {
         posPlayer = 0;
         vidas = 5;
         anguloObt = 0;
+        vetTextures = new Texture[3];
+        carregarTextura(gl, txtInicio, 0);
+        carregarTextura(gl, txtFundo, 1);
+        carregarTextura(gl, txtFim, 2);
         contLuz = 0;
-        start = pause = fase = teste = reset = ready = false;
+        start = pause = fase = teste = reset = ready = destroy = false;
         telaInicial = true;
         random = new Random();
-        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
-
         //Habilita o buffer de profundidade
         gl.glEnable(GL2.GL_DEPTH_TEST);
     }
@@ -85,14 +94,22 @@ public class Cena implements GLEventListener {
         //limpa a janela com a cor especificada
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
         gl.glEnable(GL2.GL_DEPTH_TEST);
+        gl.glEnable(GL2.GL_TEXTURE_2D);
         gl.glLoadIdentity(); //ler a matriz identidade
 
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+        if (destroy) {
+            esvaziarTxt(gl);
+        }
 
-        dadosObjeto(gl, 20, 580, Color.WHITE, "MODO: " + printStart(start));
-        dadosObjeto(gl, 420, 580, Color.WHITE, "Membros: ");
-        dadosObjeto(gl, 420, 560, Color.WHITE, "Dados Coletados: " + score);
-        dadosObjeto(gl, 20, 5, Color.WHITE, "Movimente com as setas, comece com espaço e pause com ESC.");
+        // Face FRONTAL
+        textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 26));
+        dadosObjeto(gl, 20, 927, Color.WHITE, "MODO: " + printStart(start));
+        dadosObjeto(gl, 935, 927, Color.WHITE, "Membros: ");
+        dadosObjeto(gl, 935, 892, Color.WHITE, "Dados Coletados:");
+        dadosObjeto(gl, 1165, 892, Color.CYAN, ""+score);
+        textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 24));
+        dadosObjeto(gl, 20, 7, Color.WHITE, "Movimente com as setas, comece com espaço e pause com ESC.");
 
         anguloObt += 0.1;
         vidas(gl, glut);
@@ -122,11 +139,13 @@ public class Cena implements GLEventListener {
         desenharPlayer(gl);
 
         if (pause) {
-            textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 48));
-            dadosObjeto(gl, 175, 400, Color.WHITE, "R -> Resume");
-            dadosObjeto(gl, 130, 330, Color.WHITE, "M -> Main Menu");
-            dadosObjeto(gl, 205, 260, Color.WHITE, "E -> Exit");
-            textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
+            gl.glPushMatrix();
+            gl.glTranslatef(0, 0, 40);
+            textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 48));
+            dadosObjeto(gl, 470, 620, Color.YELLOW, "R -> Resume");
+            dadosObjeto(gl, 470, 520, Color.YELLOW, "M -> Main Menu");
+            dadosObjeto(gl, 470, 420, Color.YELLOW, "E -> Exit");
+            gl.glPopMatrix();
         }
 
         if (vidas == 0) {
@@ -146,6 +165,29 @@ public class Cena implements GLEventListener {
         }
 
         gl.glFlush();
+    }
+
+    private void carregarTextura(GL2 gl, String fileName, int indice) {
+        Texture tex = null;
+
+        //carrega o arquivo da imagem
+        try {
+            tex = TextureIO.newTexture(new File(fileName), true);
+        } catch (IOException e) {
+            System.out.println("\n=============\nErro na leitura do arquivo "
+                    + fileName + "\n=============\n");
+        }
+
+        tex.setTexParameteri(gl, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+        tex.setTexParameteri(gl, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+
+        //GL.GL_REPEAT ou GL.GL_CLAMP        
+        tex.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
+        tex.setTexParameteri(gl, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
+
+        //GL.GL_MODULATE ou GL.GL_DECAL ou GL.GL_BLEND
+        gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_BLEND);
+        vetTextures[indice] = tex;
     }
 
     public void musica(int cont) {
@@ -324,7 +366,7 @@ public class Cena implements GLEventListener {
                 corLuz[3] = 1f;
             } else if (contLuz > 4 && contLuz <= 9) {
                 corLuz[0] = 1f;
-                corLuz[1] = 1f;
+                corLuz[1] = 0f;
                 corLuz[2] = 0f;
                 corLuz[3] = 1f;
             } else {
@@ -378,21 +420,9 @@ public class Cena implements GLEventListener {
     }
 
     public void desenharCirculo2(GL2 gl) {
-        float[] cor = {1, 1, 1};
-        if (contLuz >= 0 && contLuz <= 4) {
-            cor[0] = 1f;
-            cor[1] = 1f;
-            cor[2] = 1f;
-
-        } else if (contLuz > 4 && contLuz <= 9) {
-            cor[0] = 1f;
-            cor[1] = 1f;
-            cor[2] = 0f;
-            ;
-        } else {
-            contLuz = 0;
-        }
-        contLuz++;
+        float[] cor = {1, 1, 0};
+       
+        if(contLuz >= 0 && contLuz < 4){
         gl.glPushMatrix();
         gl.glBegin(GL2.GL_POLYGON);
         gl.glColor3f(cor[0], cor[1], cor[2]);
@@ -419,6 +449,8 @@ public class Cena implements GLEventListener {
         }
         gl.glEnd();
         gl.glPopMatrix();
+        }
+        contLuz++;
     }
 
     public void fim() {
@@ -447,10 +479,11 @@ public class Cena implements GLEventListener {
             }
             return "Jogando";
         }
-        return "Tela Inicial";
+        return "Parado";
     }
 
     public void desenharObstaculo(GL2 gl, GLUT glut) {
+        float[] corLuz = {1f, 1f, 1f, 1f};
         gl.glPushMatrix();
         gl.glBegin(gl.GL_TRIANGLES);
 
@@ -465,7 +498,18 @@ public class Cena implements GLEventListener {
         gl.glVertex3f(8f, 8f, 8f);
         gl.glEnd();
         gl.glPushMatrix();
-        gl.glColor3f(1, 1, 1);
+        if (contLuz >= 0 && contLuz <= 4) {
+                corLuz[0] = 0f;
+                corLuz[1] = 0f;
+                corLuz[2] = 0f;
+                corLuz[3] = 1f;
+            } else if (contLuz > 4 && contLuz <= 9) {
+                corLuz[0] = 1f;
+                corLuz[1] = 0f;
+                corLuz[2] = 0f;
+                corLuz[3] = 1f;
+            }
+        gl.glColor3f(corLuz[0], corLuz[1], corLuz[2]);
         gl.glTranslatef(0, 0, 8f);
         glut.glutSolidSphere(6, 20, 16);
         gl.glPopMatrix();
@@ -473,13 +517,18 @@ public class Cena implements GLEventListener {
     }
 
     public void desenharFundo(GL2 gl, GLUT glut) {
+
         gl.glPushMatrix();
+        gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_BLEND);
+
+        vetTextures[1].bind(gl);
+        vetTextures[1].enable(gl);
         gl.glBegin(gl.GL_TRIANGLES);
         gl.glPushMatrix();
         gl.glTranslatef(0, 0, 10f);
         //Parede esquerda
 
-        gl.glColor3f(0f, 0.41f, 0.6f);
+        gl.glColor3f(0.6f, 0.6f, 0.6f);
         gl.glVertex3f(-94, -85, 8f);
         gl.glVertex3f(-90, -85, 8f);
         gl.glVertex3f(-94, 80, 8f);
@@ -489,7 +538,6 @@ public class Cena implements GLEventListener {
         gl.glVertex3f(-90, 80, 8f);
 
         //Teto
-        gl.glColor3f(0f, 0.41f, 0.6f);
         gl.glVertex3f(-94, 80, 8f);
         gl.glVertex3f(94, 80, 8f);
         gl.glVertex3f(-94, 84, 8f);
@@ -499,7 +547,6 @@ public class Cena implements GLEventListener {
         gl.glVertex3f(94, 84, 8f);
 
         //Parede direita
-        gl.glColor3f(0f, 0.41f, 0.6f);
         gl.glVertex3f(90, -85, 8f);
         gl.glVertex3f(94, -85, 8f);
         gl.glVertex3f(94, 80, 8f);
@@ -522,68 +569,111 @@ public class Cena implements GLEventListener {
         gl.glTranslatef(0, 0, 5f);
         //fundo
         gl.glColor3f(1f, 1f, 1f);
+        gl.glTexCoord3f(0f, 0f, 1f);
         gl.glVertex3f(-90f, -85f, 1f);
+        gl.glTexCoord3f(1f, 0f, 1f);
         gl.glVertex3f(90f, -85f, 1f);
+        gl.glTexCoord3f(0f, 1f, 1f);
         gl.glVertex3f(-90f, 80f, 1f);
 
+        gl.glTexCoord3f(0f, 1f, 1f);
         gl.glVertex3f(-90f, 80f, 1f);
+        gl.glTexCoord3f(1f, 0f, 1f);
         gl.glVertex3f(90f, -85f, 1f);
+        gl.glTexCoord3f(1f, 1f, 1f);
         gl.glVertex3f(90f, 80f, 1f);
 
         gl.glEnd();
+        vetTextures[1].disable(gl);
+
         gl.glPopMatrix();
     }
 
     public void desenharTelaInicial(GL2 gl) {
-        gl.glPushMatrix();
-        gl.glTranslatef(0, 0, 20);
-        gl.glBegin(gl.GL_TRIANGLES);
-        //fundo
-        gl.glColor3f(0f, 1f, 1f);
-        gl.glVertex3f(-100f, -100f, 10f);
-        gl.glVertex3f(100f, -100f, 10f);
-        gl.glVertex3f(-100f, 100f, 10f);
 
-        gl.glVertex3f(-100f, 100f, 10f);
-        gl.glVertex3f(100f, -100f, 10f);
-        gl.glVertex3f(100f, 100f, 10f);
+        gl.glPushMatrix();
+        gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_DECAL);
+
+        vetTextures[0].bind(gl);
+        vetTextures[0].enable(gl);
+        gl.glTranslatef(0, 0, 20);
+
+        gl.glBegin(gl.GL_TRIANGLES);
+
+        gl.glColor3f(0f, 1f, 1f);
+        gl.glTexCoord2f(0f, 0f);
+        gl.glVertex2f(-100f, -100f);
+        gl.glTexCoord2f(1f, 0f);
+        gl.glVertex2f(100f, -100f);
+        gl.glTexCoord2f(0f, 1f);
+        gl.glVertex2f(-100f, 100f);
+        //fundo
+
+        gl.glTexCoord2f(0f, 1f);
+        gl.glVertex2f(-100f, 100f);
+        gl.glTexCoord2f(1f, 0f);
+        gl.glVertex2f(100f, -100f);
+        gl.glTexCoord2f(1f, 1f);
+        gl.glVertex2f(100f, 100f);
         gl.glEnd();
 
-        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 48));
-        dadosObjeto(gl, 175, 500, Color.WHITE, "Metal Pong");
-        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 18));
-        dadosObjeto(gl, 50, 360, Color.WHITE, "Você e seu esquadrão infiltraram em uma base inimiga !");
-        dadosObjeto(gl, 50, 320, Color.WHITE, "Colete as informações com os seus aliados");
-        dadosObjeto(gl, 50, 280, Color.WHITE, "Faça com que eles permaneçam o");
-        dadosObjeto(gl, 350, 280, Color.RED, "MAXIMO POSSIVEL");
-        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 34));
-        dadosObjeto(gl, 130, 40, Color.WHITE, "Tecle E para iniciar");
-        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
+        vetTextures[0].disable(gl);
+
+        textRenderer = new TextRenderer(new Font("Arial Black", Font.PLAIN, 80));
+        dadosObjeto(gl, 140, 640, Color.WHITE, "Metal Pong");
+        textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 36));
+        dadosObjeto(gl, 60, 500, Color.WHITE, "Você e seu esquadrão infiltraram na base inimiga !!!");
+        dadosObjeto(gl, 60, 440, Color.WHITE, "Colete as informações com os seus aliados");
+        dadosObjeto(gl, 60, 380, Color.WHITE, "Faça com que eles permaneçam o");
+        dadosObjeto(gl, 660, 380, Color.RED, "MAXIMO POSSIVEL");
+        textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 34));
+        dadosObjeto(gl, 140, 260, Color.WHITE, "Tecle");
+        dadosObjeto(gl, 240, 260, Color.YELLOW, "E");
+        dadosObjeto(gl, 280, 260, Color.WHITE, "para iniciar");
+
+        textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 15));
 
         gl.glPopMatrix();
     }
 
     public void desenharTelaFinal(GL2 gl) {
+
         gl.glPushMatrix();
+        gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_DECAL);
+
+        vetTextures[2].bind(gl);
+        vetTextures[2].enable(gl);
         gl.glTranslatef(0, 0, 20);
         gl.glBegin(gl.GL_TRIANGLES);
         //fundo
         gl.glColor3f(1f, 1f, 0f);
+        gl.glTexCoord3f(0f, 0f, 10f);
         gl.glVertex3f(-100f, -100f, 10f);
+        gl.glTexCoord3f(1f, 0f, 10f);
         gl.glVertex3f(100f, -100f, 10f);
+        gl.glTexCoord3f(0f, 1f, 10f);
         gl.glVertex3f(-100f, 100f, 10f);
 
+        gl.glTexCoord3f(0f, 1f, 10f);
         gl.glVertex3f(-100f, 100f, 10f);
+        gl.glTexCoord3f(1f, 0f, 10f);
         gl.glVertex3f(100f, -100f, 10f);
+        gl.glTexCoord3f(1f, 1f, 10f);
         gl.glVertex3f(100f, 100f, 10f);
         gl.glEnd();
+        vetTextures[2].disable(gl);
 
-        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 48));
-        dadosObjeto(gl, 160, 500, Color.WHITE, "GAME OVER");
-        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 34));
-        dadosObjeto(gl, 70, 240, Color.RED, "Informações adquiridas: " + score);
-        dadosObjeto(gl, 110, 40, Color.WHITE, "Tecle E para continuar");
-        textRenderer = new TextRenderer(new Font("Comic Sans MS Negrito", Font.BOLD, 15));
+        textRenderer = new TextRenderer(new Font("Arial Black", Font.BOLD, 48));
+        dadosObjeto(gl, 140, 640, Color.BLACK, "GAME OVER");
+        textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 38));
+        dadosObjeto(gl, 140, 450, Color.WHITE, "Informações adquiridas:");
+        dadosObjeto(gl, 590, 450, Color.CYAN, "" + score);
+        textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 34));
+        dadosObjeto(gl, 140, 260, Color.WHITE, "Tecle");
+        dadosObjeto(gl, 240, 260, Color.YELLOW, "E");
+        dadosObjeto(gl, 280, 260, Color.WHITE, "Para Reiniciar");
+
+        textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 15));
 
         gl.glPopMatrix();
     }
@@ -615,6 +705,12 @@ public class Cena implements GLEventListener {
         textRenderer.draw(frase, xPosicao, yPosicao);
         textRenderer.endRendering();
         gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+    }
+
+    public void esvaziarTxt(GL2 gl) {
+        for (int i = 0; i < vetTextures.length; i++) {
+            vetTextures[i].destroy(gl);
+        }
     }
 
     @Override

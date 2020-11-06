@@ -46,10 +46,11 @@ public class KeyBoard implements KeyListener {
                     }
                     break;
                 case KeyEvent.VK_E:
+                    cena.destroy = true;
                     System.exit(0);
                     break;
                 case KeyEvent.VK_M:
-                    if(cena.cont == 1){
+                    if (cena.cont == 1) {
                         cena.musica(5);
                     } else {
                         cena.musica(8);
@@ -95,7 +96,7 @@ public class KeyBoard implements KeyListener {
                     } else {
                         cena.musica(7);
                     }
-                } else {
+                } else if (!cena.telaInicial) {
                     if (cena.cont == 1) {
                         cena.musica(3);
                     } else {

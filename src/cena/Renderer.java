@@ -15,8 +15,8 @@ import input.KeyBoard;
 public class Renderer {
 
     private static GLWindow window = null;
-    public static int screenWidth = 600;  //1280  - 640
-    public static int screenHeight = 600; //960  - 480
+    public static int screenWidth = 1280;  //1280  - 640
+    public static int screenHeight = 960; //960  - 480
 
     //Cria a janela de rendeziracao do JOGL
     public static void init() {
@@ -25,8 +25,8 @@ public class Renderer {
         GLCapabilities caps = new GLCapabilities(profile);
         window = GLWindow.create(caps);
         window.setSize(screenWidth, screenHeight);
-        //window.setFullscreen(true);
-        window.setTitle("Le Pong");
+        window.setFullscreen(true);
+        window.setTitle("Metal Pong");
 
         //window.setResizable(false);
         Cena cena = new Cena();
