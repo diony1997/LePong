@@ -688,7 +688,7 @@ public class Cena implements GLEventListener {
     public void desenharBola(GL2 gl, GLUT glut) {
         gl.glPushMatrix();
         gl.glTranslatef(anguloX, anguloY, 6f);
-        gl.glColor3f(1f, 1f, 1f);
+        gl.glColor3f(0.8f, 0.8f, 0.8f);
         glut.glutSolidSphere(8, 20, 16);
         gl.glPopMatrix();
     }
