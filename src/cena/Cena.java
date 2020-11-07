@@ -29,7 +29,7 @@ public class Cena implements GLEventListener {
     private float xMin, xMax, yMin, yMax, zMin, zMax;
     private TextRenderer textRenderer;
     public float auxX, auxY, posPlayer, anguloX, anguloY, anguloObt;
-    public boolean start, pause, fase, teste, telaInicial, reset, ready, destroy;
+    public boolean start, pause, fase, teste, telaInicial, reset, ready, destroy, gameOver;
     private double contLuz;
     public int tela, score, vidas, cont, qtdTxt;
     private GLU glu;
@@ -73,7 +73,7 @@ public class Cena implements GLEventListener {
         carregarTextura(gl, txtFundo, 1);
         carregarTextura(gl, txtFim, 2);
         contLuz = 0;
-        start = pause = fase = teste = reset = ready = destroy = false;
+        start = pause = fase = teste = reset = ready = destroy = gameOver = false;
         telaInicial = true;
         random = new Random();
         //Habilita o buffer de profundidade
@@ -138,19 +138,10 @@ public class Cena implements GLEventListener {
             cont = 1;
         }
         desenharFundo(gl, glut);
-        desenharPlayer(gl);
-
-        if (pause) {
-            gl.glPushMatrix();
-            gl.glTranslatef(0, 0, 40);
-            textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 48));
-            dadosObjeto(gl, 470, 620, Color.YELLOW, "R -> Resume");
-            dadosObjeto(gl, 470, 520, Color.YELLOW, "M -> Main Menu");
-            dadosObjeto(gl, 470, 420, Color.YELLOW, "E -> Exit");
-            gl.glPopMatrix();
-        }
+        desenharPlayer(gl);        
 
         if (vidas == 0) {
+            gameOver = true;
             desenharTelaFinal(gl);
             if (cont == 1) {
                 musica(5);
@@ -164,6 +155,19 @@ public class Cena implements GLEventListener {
             if (ready) {
                 fim();
             }
+        }
+        
+        if (pause) {
+            gl.glPushMatrix();
+            gl.glTranslatef(0, 0, 40);
+            textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 48));
+//            dadosObjeto(gl, 470, 620, Color.YELLOW, "R -> Resume");
+//            dadosObjeto(gl, 470, 520, Color.YELLOW, "M -> Main Menu");
+//            dadosObjeto(gl, 470, 420, CotelaIniciallor.YELLOW, "E -> Exit");
+            dadosObjeto(gl, !telaInicial && !gameOver ? 470 : 820, !telaInicial && !gameOver ? 620 : 820, !telaInicial && !gameOver ? Color.YELLOW : Color.RED, "R -> Resume");
+            dadosObjeto(gl, !telaInicial && !gameOver ? 470 : 820, !telaInicial && !gameOver ? 520 : 720, !telaInicial && !gameOver ? Color.YELLOW : Color.RED, "M -> Main Menu");
+            dadosObjeto(gl, !telaInicial && !gameOver ? 470 : 820, !telaInicial && !gameOver ? 420 : 620, !telaInicial && !gameOver ? Color.YELLOW : Color.RED, "E -> Exit");
+            gl.glPopMatrix();
         }
 
         gl.glFlush();
@@ -456,6 +460,7 @@ public class Cena implements GLEventListener {
     }
 
     public void fim() {
+        gameOver = false;
         anguloY = - 72;
         tela = 0;
         start = false;
@@ -489,7 +494,7 @@ public class Cena implements GLEventListener {
         gl.glPushMatrix();
         gl.glBegin(gl.GL_TRIANGLES);
 
-        gl.glColor3f(0.4f, 0.4f, 0.4f);
+        gl.glColor3f(1f, 1f, 1f);
 
         gl.glVertex3f(-8f, -8f, 8f);
         gl.glVertex3f(8f, -8f, 8f);
@@ -530,7 +535,7 @@ public class Cena implements GLEventListener {
         gl.glTranslatef(0, 0, 10f);
         //Parede esquerda
 
-        gl.glColor3f(0.6f, 0.6f, 0.6f);
+        gl.glColor3f(1f, 1f, 1f);
         gl.glVertex3f(-94, -85, 8f);
         gl.glVertex3f(-90, -85, 8f);
         gl.glVertex3f(-94, 80, 8f);
@@ -624,7 +629,7 @@ public class Cena implements GLEventListener {
         textRenderer = new TextRenderer(new Font("Arial Black", Font.PLAIN, 80));
         dadosObjeto(gl, 140, 640, Color.WHITE, "Metal Pong");
         textRenderer = new TextRenderer(new Font("Steamer", Font.BOLD, 36));
-        dadosObjeto(gl, 60, 500, Color.WHITE, "Você e seu esquadrão infiltraram na base inimiga !!!");
+        dadosObjeto(gl, 60, 500, Color.WHITE, "Você e seu esquadrão infiltraram na base inimiga!!!");
         dadosObjeto(gl, 60, 440, Color.WHITE, "Colete as informações com os seus aliados");
         dadosObjeto(gl, 60, 380, Color.WHITE, "Faça com que eles permaneçam o");
         dadosObjeto(gl, 660, 380, Color.RED, "MAXIMO POSSIVEL");
@@ -683,13 +688,13 @@ public class Cena implements GLEventListener {
     public void desenharBola(GL2 gl, GLUT glut) {
         gl.glPushMatrix();
         gl.glTranslatef(anguloX, anguloY, 6f);
-        gl.glColor3f(0.2f, 0.2f, 0.2f);
+        gl.glColor3f(1f, 1f, 1f);
         glut.glutSolidSphere(8, 20, 16);
         gl.glPopMatrix();
     }
 
     public void desenharPlayer(GL2 gl) {
-        gl.glColor3f(0.4f, 0.4f, 0.4f);
+        gl.glColor3f(1f, 1f, 1f);
         gl.glPointSize(200f);
         gl.glBegin(GL2.GL_QUADS);
         gl.glVertex3f((14f + posPlayer), -85f, 8f);
